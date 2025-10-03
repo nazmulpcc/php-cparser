@@ -5,48 +5,16 @@ extern "C"
 #include "zend_exceptions.h"
 }
 
+#include "php_cparser.h"
+
+#ifdef __cplusplus
 #include <clang-c/Index.h>
 #include <string>
 #include <vector>
+#endif
 
-// Each TranslationUnit object will wrap a CXTranslationUnit pointer
-typedef struct _cparser_translation_unit
-{
-    CXTranslationUnit tu;
-    zend_object std;
-} cparser_translation_unit;
+using cparser_translation_unit = cparser_obj<CXTranslationUnit>;
 
-static inline cparser_translation_unit *php_cparser_translation_unit_fetch(zend_object *obj)
-{
-    return (cparser_translation_unit *)((char *)(obj)-XtOffsetOf(cparser_translation_unit, std));
-}
-
-// Class entry
-extern zend_class_entry *cparser_translationunit_ce;
-
-// Object handler
-static zend_object *cparser_translation_unit_create(zend_class_entry *ce)
-{
-    cparser_translation_unit *intern = (cparser_translation_unit *)ecalloc(1, sizeof(cparser_translation_unit) + zend_object_properties_size(ce));
-    zend_object_std_init(&intern->std, ce);
-    object_properties_init(&intern->std, ce);
-    intern->std.handlers = &std_object_handlers;
-    intern->tu = nullptr;
-    return &intern->std;
-}
-
-static void cparser_translation_unit_free(zend_object *obj)
-{
-    cparser_translation_unit *intern = php_cparser_translation_unit_fetch(obj);
-    if (intern->tu)
-    {
-        clang_disposeTranslationUnit(intern->tu);
-        intern->tu = nullptr;
-    }
-    zend_object_std_dtor(&intern->std);
-}
-
-/* {{{ CParser\TranslationUnit::fromFile(string $filename, array $args = []): TranslationUnit */
 ZEND_METHOD(CParser_TranslationUnit, fromFile)
 {
     char *filename;
@@ -92,15 +60,12 @@ ZEND_METHOD(CParser_TranslationUnit, fromFile)
 
     // Allocate PHP object
     object_init_ex(return_value, cparser_translationunit_ce);
-    cparser_translation_unit *intern = php_cparser_translation_unit_fetch(Z_OBJ_P(return_value));
-    intern->tu = tu;
+    cparser_translation_unit *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(return_value));
+    intern->native = tu;
 
-    // Note: index freed automatically with TU
     clang_disposeIndex(idx);
 }
-/* }}} */
 
-/* {{{ CParser\TranslationUnit::classes(): iterable<ClassDecl> */
 ZEND_METHOD(CParser_TranslationUnit, classes)
 {
     ZEND_PARSE_PARAMETERS_NONE();
@@ -109,9 +74,7 @@ ZEND_METHOD(CParser_TranslationUnit, classes)
     // For now, return empty array
     array_init(return_value);
 }
-/* }}} */
 
-/* {{{ CParser\TranslationUnit::enums(): iterable<EnumDecl> */
 ZEND_METHOD(CParser_TranslationUnit, enums)
 {
     ZEND_PARSE_PARAMETERS_NONE();
@@ -119,30 +82,37 @@ ZEND_METHOD(CParser_TranslationUnit, enums)
     // TODO: yield enums lazily
     array_init(return_value);
 }
-/* }}} */
 
-/* {{{ CParser\TranslationUnit::diagnostics(): iterable<Diagnostic> */
 ZEND_METHOD(CParser_TranslationUnit, diagnostics)
 {
     ZEND_PARSE_PARAMETERS_NONE();
+    cparser_translation_unit *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(getThis()));
 
-    cparser_translation_unit *intern = php_cparser_translation_unit_fetch(Z_OBJ_P(getThis()));
-    if (!intern->tu)
+    if (!intern->native)
     {
         array_init(return_value);
         return;
     }
 
-    int num = clang_getNumDiagnostics(intern->tu);
-    array_init_size(return_value, num);
+    unsigned count = clang_getNumDiagnostics(intern->native);
+    array_init_size(return_value, count);
 
-    for (int i = 0; i < num; i++)
+    for (unsigned i = 0; i < count; i++)
     {
-        CXDiagnostic diag = clang_getDiagnostic(intern->tu, i);
-        CXString msg = clang_formatDiagnostic(diag, clang_defaultDiagnosticDisplayOptions());
-        add_next_index_string(return_value, clang_getCString(msg));
-        clang_disposeString(msg);
-        clang_disposeDiagnostic(diag);
+        CXDiagnostic diag = clang_getDiagnostic(intern->native, i);
+
+        if (!diag)
+        {
+            add_next_index_null(return_value);
+            continue;
+        }
+
+        zval zv;
+        object_init_ex(&zv, cparser_diagnostic_ce);
+
+        auto *diag_intern = php_cparser_fetch<CXDiagnostic>(Z_OBJ(zv));
+        diag_intern->native = diag;
+
+        add_next_index_zval(return_value, &zv);
     }
 }
-/* }}} */
