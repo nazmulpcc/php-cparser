@@ -1,0 +1,7 @@
+ARG_ENABLE('cparser', 'cparser support', 'no');
+
+if (PHP_CPARSER != 'no') {
+	AC_DEFINE('HAVE_CPARSER', 1, "Define to 1 if the PHP extension 'cparser' is available.");
+
+	EXTENSION('cparser', 'cparser.c', null, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+}
