@@ -25,6 +25,16 @@ ZEND_METHOD(CParser_MethodDecl, getAccess)
     RETVAL_LONG(clang_getCXXAccessSpecifier(intern->native));
 }
 
+ZEND_METHOD(CParser_MethodDecl, getReturnType)
+{
+    RETURN_STRING("");
+}
+
+ZEND_METHOD(CParser_MethodDecl, getParameters)
+{
+    RETURN_STRING("");
+}
+
 ZEND_METHOD(CParser_MethodDecl, isStatic)
 {
     ZEND_PARSE_PARAMETERS_NONE();

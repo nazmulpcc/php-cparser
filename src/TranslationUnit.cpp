@@ -13,7 +13,7 @@ extern "C"
 #include <vector>
 #endif
 
-using cparser_translation_unit = cparser_obj<CXTranslationUnit>;
+using cparser_tu = cparser_obj<CXTranslationUnit>;
 
 ZEND_METHOD(CParser_TranslationUnit, fromFile)
 {
@@ -60,7 +60,7 @@ ZEND_METHOD(CParser_TranslationUnit, fromFile)
 
     // Allocate PHP object
     object_init_ex(return_value, cparser_translationunit_ce);
-    cparser_translation_unit *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(return_value));
+    cparser_tu *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(return_value));
     intern->native = tu;
 
     clang_disposeIndex(idx);
@@ -69,24 +69,21 @@ ZEND_METHOD(CParser_TranslationUnit, fromFile)
 ZEND_METHOD(CParser_TranslationUnit, classes)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-
-    // TODO: yield classes lazily
-    // For now, return empty array
-    array_init(return_value);
+    zval it = ast_create_iterator_from_tu(getThis(), AST_IT_CLASSES);
+    RETURN_ZVAL(&it, 0, 1);
 }
 
 ZEND_METHOD(CParser_TranslationUnit, enums)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-
-    // TODO: yield enums lazily
-    array_init(return_value);
+    zval it = ast_create_iterator_from_tu(getThis(), AST_IT_ENUMS);
+    RETURN_ZVAL(&it, 0, 1);
 }
 
 ZEND_METHOD(CParser_TranslationUnit, diagnostics)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    cparser_translation_unit *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(getThis()));
+    cparser_tu *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(getThis()));
 
     if (!intern->native)
     {

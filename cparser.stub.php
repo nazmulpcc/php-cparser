@@ -5,6 +5,20 @@
 namespace CParser;
 
 /**
+ * @template T of ClassDecl
+ * @implements \Iterator<int, T>
+ */
+final class ClassIterator implements \Iterator
+{
+    public function __construct(TranslationUnit $tu) {}
+    public function current(): ?ClassDecl {}
+    public function key(): int {}
+    public function next(): void {}
+    public function rewind(): void {}
+    public function valid(): bool {}
+}
+
+/**
  * Represents a parsed translation unit (a source or header file).
  */
 final class TranslationUnit

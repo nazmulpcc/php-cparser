@@ -8,6 +8,7 @@
 #include "ext/standard/info.h"
 #include "php_cparser.h"
 #include "cparser_arginfo.h"
+#include "zend_interfaces.h"
 
 /* For compatibility with older PHP versions */
 #ifndef ZEND_PARSE_PARAMETERS_NONE
@@ -27,6 +28,7 @@ zend_class_entry *cparser_templateparameter_ce = nullptr;
 zend_class_entry *cparser_templateargument_ce = nullptr;
 zend_class_entry *cparser_enumdecl_ce = nullptr;
 zend_class_entry *cparser_diagnostic_ce = nullptr;
+zend_class_entry *cparser_classiterator_ce = nullptr;
 
 PHP_MINIT_FUNCTION(cparser)
 {
@@ -69,6 +71,9 @@ PHP_MINIT_FUNCTION(cparser)
 
 	cparser_diagnostic_ce = register_class_CParser_Diagnostic();
 	cparser_diagnostic_ce->create_object = cparser_object_create<CXDiagnostic>;
+
+	cparser_classiterator_ce = register_class_CParser_ClassIterator(zend_ce_iterator);
+	cparser_classiterator_ce->create_object = cparser_object_create<ast_cursor_iterator>;
 
 	return SUCCESS;
 }
