@@ -71,35 +71,6 @@ void cparser_object_free(zend_object *object)
     zend_object_std_dtor(object);
 }
 
-typedef struct _ast_cursor_iterator
-{
-
-    zend_object std; // Zend object header
-} ast_cursor_iterator;
-
-static inline ast_cursor_iterator *Z_AST_IT_P(zend_object *obj)
-{
-    return (ast_cursor_iterator *)((char *)obj - XtOffsetOf(ast_cursor_iterator, std));
-}
-
-#include <vector>
-struct collect_data
-{
-    std::vector<CXCursor> vec;
-};
-
-using cparser_tu = cparser_obj<CXTranslationUnit>;
-
-/* create and populate an iterator object for classes */
-static inline zval ast_create_iterator_from_tu(zval *tu_zv, int filter_kind)
-{
-    zval it_obj;
-    object_init_ex(&it_obj, cparser_cursoriterator_ce);
-    auto *it = Z_AST_IT_P(Z_OBJ(it_obj));
-    // @todo
-    return it_obj;
-}
-
 #endif
 
 #endif /* PHP_CPARSER_H */

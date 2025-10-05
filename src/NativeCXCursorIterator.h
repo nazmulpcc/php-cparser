@@ -46,7 +46,7 @@ private:
 
     bool cursorMatchesFilter(CXCursor cursor) const
     {
-        if (filter_kind == 0)
+        if (filter_kind < 1)
         {
             return true;
         }

@@ -8,6 +8,7 @@ extern "C"
 #include "php_cparser.h"
 #include "NativeCXCursorIterator.h"
 
+using cparser_tu = cparser_obj<CXTranslationUnit>;
 using cparser_iterator = cparser_obj<NativeCXCursorIterator>;
 
 ZEND_METHOD(CParser_CursorIterator, __construct)

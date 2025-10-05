@@ -8,12 +8,23 @@ extern "C"
 #include "php_cparser.h"
 
 #ifdef __cplusplus
+#include "NativeCXCursorIterator.h"
 #include <clang-c/Index.h>
 #include <string>
 #include <vector>
 #endif
 
 using cparser_tu = cparser_obj<CXTranslationUnit>;
+
+#define RETURN_CURSOR_IT_WITH_FILTER(kind)                                                                           \
+    do                                                                                                               \
+    {                                                                                                                \
+        cparser_tu *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(getThis()));                               \
+        object_init_ex(return_value, cparser_cursoriterator_ce);                                                     \
+        auto *it_intern = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(return_value));                          \
+        it_intern->native = NativeCXCursorIterator(clang_getTranslationUnitCursor(intern->native), (int)kind, true); \
+        return;                                                                                                      \
+    } while (0)
 
 ZEND_METHOD(CParser_TranslationUnit, fromFile)
 {
@@ -60,45 +71,32 @@ ZEND_METHOD(CParser_TranslationUnit, fromFile)
 
     // Allocate PHP object
     object_init_ex(return_value, cparser_translationunit_ce);
-    cparser_tu *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(return_value));
-    intern->native = tu;
+    php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(return_value))->native = tu;
 
     clang_disposeIndex(idx);
 }
 
 ZEND_METHOD(CParser_TranslationUnit, cursors)
 {
-    zend_long kind = -1;
+    zend_long kind = 0;
     ZEND_PARSE_PARAMETERS_START(0, 1)
     Z_PARAM_OPTIONAL
     Z_PARAM_LONG(kind)
     ZEND_PARSE_PARAMETERS_END();
 
-    // Fetch TU intern
-    cparser_tu *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(getThis()));
-    if (!intern || !intern->native)
-    {
-        RETURN_FALSE;
-    }
-
-    // Create iterator object
-    zval it = ast_create_iterator_from_tu(getThis(), kind);
-
-    // @todo implement NativeCXCursorIterator and set it to the iterator object
-
-    RETURN_ZVAL(&it, 0, 1);
+    RETURN_CURSOR_IT_WITH_FILTER(kind);
 }
 
 ZEND_METHOD(CParser_TranslationUnit, classes)
 {
-    //
+    ZEND_PARSE_PARAMETERS_NONE();
+    RETURN_CURSOR_IT_WITH_FILTER(CXCursor_ClassDecl);
 }
 
 ZEND_METHOD(CParser_TranslationUnit, enums)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    zval it = ast_create_iterator_from_tu(getThis(), (int)CXCursor_EnumDecl);
-    RETURN_ZVAL(&it, 0, 1);
+    RETURN_CURSOR_IT_WITH_FILTER(CXCursor_EnumDecl);
 }
 
 ZEND_METHOD(CParser_TranslationUnit, diagnostics)
