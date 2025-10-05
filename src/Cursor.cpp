@@ -84,105 +84,70 @@ ZEND_METHOD(CParser_Cursor, getType)
     php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
 }
 
-ZEND_METHOD(CParser_Cursor, getCanonicalType)
-{
-    ZEND_PARSE_PARAMETERS_NONE();
-
-    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
-    if (!intern)
-        RETURN_NULL();
-
-    CXType t = clang_getCanonicalType(clang_getCursorType(intern->native));
-    object_init_ex(return_value, cparser_type_ce);
-    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
-}
-
-ZEND_METHOD(CParser_Cursor, getEnumConstantValue)
-{
-    ZEND_PARSE_PARAMETERS_NONE();
-
-    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
-    if (!intern)
-        RETURN_NULL();
-
-    if (clang_getCursorKind(intern->native) != CXCursor_EnumConstantDecl)
-        RETURN_NULL();
-
-    CXEvalResult eval = clang_Cursor_Evaluate(intern->native);
-    if (!eval)
-        RETURN_NULL();
-
-    double val = clang_EvalResult_getAsDouble(eval);
-    clang_EvalResult_dispose(eval);
-
-    RETURN_DOUBLE(val);
-}
-
-ZEND_METHOD(CParser_Cursor, getNumArguments)
-{
-    ZEND_PARSE_PARAMETERS_NONE();
-
-    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
-    if (!intern)
-        RETURN_NULL();
-
-    int num = clang_Cursor_getNumArguments(intern->native);
-    if (num < 0)
-        RETURN_NULL();
-    RETURN_LONG(num);
-}
-
-ZEND_METHOD(CParser_Cursor, getArgumentType)
-{
-    zend_long index;
-    ZEND_PARSE_PARAMETERS_START(1, 1)
-    Z_PARAM_LONG(index)
-    ZEND_PARSE_PARAMETERS_END();
-
-    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
-    if (!intern)
-        RETURN_NULL();
-
-    CXCursor arg = clang_Cursor_getArgument(intern->native, (unsigned)index);
-    if (clang_Cursor_isNull(arg))
-        RETURN_NULL();
-
-    object_init_ex(return_value, cparser_cursor_ce);
-    php_cparser_fetch<CXCursor>(Z_OBJ_P(return_value))->native = arg;
-}
-
 ZEND_METHOD(CParser_Cursor, isDefinition)
 {
     ZEND_PARSE_PARAMETERS_NONE();
+
     cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
     if (!intern)
-        RETURN_FALSE;
-    RETURN_BOOL(clang_isCursorDefinition(intern->native));
+        RETURN_NULL();
+
+    bool is_def = clang_isCursorDefinition(intern->native);
+    RETURN_BOOL(is_def);
 }
 
-ZEND_METHOD(CParser_Cursor, isConstQualified)
+ZEND_METHOD(CParser_Cursor, getCanonical)
 {
     ZEND_PARSE_PARAMETERS_NONE();
+
     cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
     if (!intern)
-        RETURN_FALSE;
-    RETURN_BOOL(clang_isConstQualifiedType(clang_getCursorType(intern->native)));
+        RETURN_NULL();
+
+    CXCursor canonical = clang_getCanonicalCursor(intern->native);
+    object_init_ex(return_value, cparser_cursor_ce);
+    php_cparser_fetch<CXCursor>(Z_OBJ_P(return_value))->native = canonical;
 }
 
-ZEND_METHOD(CParser_Cursor, isVolatileQualified)
+ZEND_METHOD(CParser_Cursor, getParent)
 {
     ZEND_PARSE_PARAMETERS_NONE();
+
     cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
     if (!intern)
-        RETURN_FALSE;
-    RETURN_BOOL(clang_isVolatileQualifiedType(clang_getCursorType(intern->native)));
+        RETURN_NULL();
+
+    CXCursor parent = clang_getCursorSemanticParent(intern->native);
+    object_init_ex(return_value, cparser_cursor_ce);
+    php_cparser_fetch<CXCursor>(Z_OBJ_P(return_value))->native = parent;
 }
 
-ZEND_METHOD(CParser_Cursor, isRestrictQualified)
+ZEND_METHOD(CParser_Cursor, getChildren)
 {
-    ZEND_PARSE_PARAMETERS_NONE();
+    zend_long filter_kind = 0;
+
+    ZEND_PARSE_PARAMETERS_START(0, 1)
+    Z_PARAM_OPTIONAL
+    Z_PARAM_LONG(filter_kind)
+    ZEND_PARSE_PARAMETERS_END();
+
+    zval it_obj;
+    object_init_ex(&it_obj, cparser_classiterator_ce);
+    auto it = Z_AST_IT_P(Z_OBJ(it_obj));
+    ZVAL_OBJ_COPY(&it->source_obj, Z_OBJ_P(getThis()));
+
     cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
     if (!intern)
-        RETURN_FALSE;
-    RETURN_BOOL(clang_isRestrictQualifiedType(clang_getCursorType(intern->native)));
+        RETURN_NULL();
+
+    // Initialize iterator root and state
+    it->root = intern->native;
+    while (!it->stack.empty())
+        it->stack.pop();
+    it->stack.push(it->root);
+
+    it->done = false;
+    it->filter_kind = (int)filter_kind;
+
+    RETURN_ZVAL(&it_obj, 0, 1);
 }

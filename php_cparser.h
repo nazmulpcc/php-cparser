@@ -62,19 +62,15 @@ void cparser_object_free(zend_object *object)
     zend_object_std_dtor(object);
 }
 
-typedef enum
-{
-    AST_IT_CLASSES,
-    AST_IT_ENUMS
-} ast_it_kind;
 typedef struct _ast_cursor_iterator
 {
-    std::stack<CXCursor> stack;
-    CXCursor current;
-    bool done;
-    zval tu_obj;
-    int filter_kind;
-    zend_object std;
+    std::stack<CXCursor> stack; // Lazy traversal stack
+    CXCursor current;           // Current cursor
+    CXCursor root;              // Root cursor (from TU or parent Cursor)
+    bool done;                  // Whether traversal is complete
+    zval source_obj;            // Reference to TranslationUnit or Cursor
+    int filter_kind;            // Optional CXCursorKind filter
+    zend_object std;            // Zend object header
 } ast_cursor_iterator;
 
 static inline ast_cursor_iterator *Z_AST_IT_P(zend_object *obj)
@@ -93,9 +89,9 @@ static void ast_cursor_iterator_free(zend_object *object)
     }
 
     /* release reference to TU object */
-    if (!Z_ISUNDEF(it->tu_obj))
+    if (!Z_ISUNDEF(it->source_obj))
     {
-        zval_ptr_dtor(&it->tu_obj);
+        zval_ptr_dtor(&it->source_obj);
     }
 
     /* call default free handler for zend_object */
@@ -110,7 +106,7 @@ static zend_object *ast_cursor_iterator_create(zend_class_entry *ce)
 
     it->std.handlers = zend_get_std_object_handlers();
     it->done = false;
-    ZVAL_UNDEF(&it->tu_obj);
+    ZVAL_UNDEF(&it->source_obj);
 
     return &it->std;
 }
@@ -138,8 +134,8 @@ static inline zval ast_create_iterator_from_tu(zval *tu_zv, int filter_kind)
 
     it->filter_kind = filter_kind;
 
-    ZVAL_UNDEF(&it->tu_obj);
-    ZVAL_COPY(&it->tu_obj, tu_zv);
+    ZVAL_UNDEF(&it->source_obj);
+    ZVAL_COPY(&it->source_obj, tu_zv);
 
     // Fetch the native TU
     cparser_tu *tu_intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(tu_zv));

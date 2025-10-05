@@ -91,7 +91,7 @@ ZEND_METHOD(CParser_TranslationUnit, cursors)
     }
 
     Z_TRY_ADDREF_P(getThis());
-    ZVAL_OBJ_COPY(&ait->tu_obj, Z_OBJ_P(getThis()));
+    ZVAL_OBJ_COPY(&ait->source_obj, Z_OBJ_P(getThis()));
 
     if (kind >= 0)
     {
@@ -109,7 +109,7 @@ ZEND_METHOD(CParser_TranslationUnit, classes)
 ZEND_METHOD(CParser_TranslationUnit, enums)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    zval it = ast_create_iterator_from_tu(getThis(), AST_IT_ENUMS);
+    zval it = ast_create_iterator_from_tu(getThis(), (int)CXCursor_EnumDecl);
     RETURN_ZVAL(&it, 0, 1);
 }
 

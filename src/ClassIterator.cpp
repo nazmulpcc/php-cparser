@@ -11,33 +11,49 @@ extern "C"
 
 ZEND_METHOD(CParser_ClassIterator, __construct)
 {
-    zval *tu;
-    ZEND_PARSE_PARAMETERS_START(1, 1)
-    Z_PARAM_OBJECT(tu)
+    zval *source;
+    zend_long filter_kind = -1;
+    ZEND_PARSE_PARAMETERS_START(1, 2)
+    Z_PARAM_OBJECT(source)
+    Z_PARAM_OPTIONAL
+    Z_PARAM_LONG(filter_kind)
     ZEND_PARSE_PARAMETERS_END();
 
     ast_cursor_iterator *it = Z_AST_IT_P(Z_OBJ_P(getThis()));
 
-    /* Store a persistent zval reference to TranslationUnit so TU won't be GC'd */
-    ZVAL_COPY(&it->tu_obj, tu);
+    /* Store a persistent zval reference to source so it won't be GC'd */
+    ZVAL_COPY(&it->source_obj, source);
 
     /* Initialize traversal state */
     it->done = false;
-    it->filter_kind = -1; /* default: no filter */
-    // stack is default-constructed
+    it->filter_kind = filter_kind;
+    it->stack = std::stack<CXCursor>(); // ensure empty
 
-    /* get TU native and push root */
-    cparser_tu *tu_intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(tu));
-    if (!tu_intern || !tu_intern->native)
+    /* Determine source type and push root cursor */
+    if (instanceof_function(Z_OBJCE_P(source), cparser_translationunit_ce))
+    {
+        cparser_tu *tu_intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(source));
+        if (!tu_intern || !tu_intern->native)
+        {
+            it->done = true;
+            RETURN_NULL();
+        }
+        CXCursor root = clang_getTranslationUnitCursor(tu_intern->native);
+        it->current = root;
+        it->stack.push(root);
+    }
+    else if (instanceof_function(Z_OBJCE_P(source), cparser_cursor_ce))
+    {
+        auto *cursor_intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(source));
+        CXCursor root = cursor_intern->native;
+        it->current = root;
+        it->stack.push(root);
+    }
+    else
     {
         it->done = true;
         RETURN_NULL();
     }
-
-    CXCursor root = clang_getTranslationUnitCursor(tu_intern->native);
-    it->current = root;
-    it->stack = std::stack<CXCursor>(); // ensure empty
-    it->stack.push(root);
 }
 
 ZEND_METHOD(CParser_ClassIterator, current)
@@ -122,24 +138,41 @@ ZEND_METHOD(CParser_ClassIterator, rewind)
     // Clear existing stack
     it->stack = std::stack<CXCursor>();
 
-    // Re-seed from TU root
-    if (Z_ISUNDEF(it->tu_obj) || Z_TYPE(it->tu_obj) != IS_OBJECT)
+    // Re-seed from source root
+    if (Z_ISUNDEF(it->source_obj) || Z_TYPE(it->source_obj) != IS_OBJECT)
     {
         it->done = true;
         RETURN_NULL();
     }
 
-    cparser_tu *tu_intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(&it->tu_obj));
-    if (!tu_intern || !tu_intern->native)
+    zval *source = &it->source_obj;
+
+    if (instanceof_function(Z_OBJCE_P(source), cparser_translationunit_ce))
+    {
+        cparser_tu *tu_intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(source));
+        if (!tu_intern || !tu_intern->native)
+        {
+            it->done = true;
+            RETURN_NULL();
+        }
+        CXCursor root = clang_getTranslationUnitCursor(tu_intern->native);
+        it->stack.push(root);
+        it->current = root;
+        it->done = false;
+    }
+    else if (instanceof_function(Z_OBJCE_P(source), cparser_cursor_ce))
+    {
+        auto *cursor_intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(source));
+        CXCursor root = cursor_intern->native;
+        it->stack.push(root);
+        it->current = root;
+        it->done = false;
+    }
+    else
     {
         it->done = true;
         RETURN_NULL();
     }
-
-    CXCursor root = clang_getTranslationUnitCursor(tu_intern->native);
-    it->stack.push(root);
-    it->current = root;
-    it->done = false;
 
     RETURN_NULL();
 }

@@ -59,18 +59,29 @@ final class TranslationUnit
 }
 
 final class Cursor {
+    /** Kind of cursor (e.g. function, class, field, etc.) */
     public function getKind(): int {}  // CParser\CursorKind::*
+
+    /** The display name or spelling of the cursor */
     public function getSpelling(): string {}
-    public function getLocation(): array{} // ['file' => string, 'line' => int, 'column' => int]
-    public function getType(): Type {}
-    public function getCanonicalType(): Type {}
-    public function getEnumConstantValue(): int {}
-    public function getNumArguments(): int {}
-    public function getArgumentType(int $index): Type {}
+
+    /** Source location of this cursor */
+    public function getLocation(): array {} // ['file' => string|null, 'line' => int, 'column' => int]
+
+    /** The type associated with this cursor, if any */
+    public function getType(): ?Type {}
+
+    /** True if this cursor represents a definition, not just a declaration */
     public function isDefinition(): bool {}
-    public function isConstQualified(): bool {}
-    public function isVolatileQualified(): bool {}
-    public function isRestrictQualified(): bool {}
+
+    /** The canonical cursor this one refers to (e.g. from typedef or alias) */
+    public function getCanonical(): ?Cursor {}
+
+    /** The parent cursor (e.g. the class that contains a method) */
+    public function getParent(): ?Cursor {}
+
+    /** Get immediate child cursors (lazy, depth = 1) */
+    public function getChildren(int $kind = -1): iterable {}
 }
 
 /**
