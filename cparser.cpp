@@ -18,6 +18,7 @@
 #endif
 
 zend_class_entry *cparser_translationunit_ce = nullptr;
+zend_class_entry *cparser_cursor_ce = nullptr;
 zend_class_entry *cparser_classdecl_ce = nullptr;
 zend_class_entry *cparser_enumconstant_ce = nullptr;
 zend_class_entry *cparser_methoddecl_ce = nullptr;
@@ -67,6 +68,9 @@ PHP_MINIT_FUNCTION(cparser)
 {
 	cparser_translationunit_ce = register_class_CParser_TranslationUnit();
 	register_cparser_ce_handlers<CXTranslationUnit>(cparser_translationunit_ce);
+
+	cparser_cursor_ce = register_class_CParser_Cursor();
+	register_cparser_ce_handlers<CXCursor>(cparser_cursor_ce);
 
 	cparser_classdecl_ce = register_class_CParser_ClassDecl();
 	register_cparser_ce_handlers<CXCursor>(cparser_classdecl_ce);

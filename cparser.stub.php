@@ -11,7 +11,7 @@ namespace CParser;
 final class ClassIterator implements \Iterator
 {
     public function __construct(TranslationUnit $tu) {}
-    public function current(): ClassDecl|EnumDecl|null {}
+    public function current(): Cursor|null {}
     public function key(): int {}
     public function next(): void {}
     public function rewind(): void {}
@@ -30,6 +30,11 @@ final class TranslationUnit
      * @param array $args  Compiler flags (e.g. ["-std=c11", "-Iinclude"])
      */
     public static function fromFile(string $filename, array $args = []): TranslationUnit {}
+
+    /**
+     * @return iterable<Cursor>
+     */
+    public function cursors(int $kind = -1): iterable {}
 
     /**
      * Lazily yield all top-level classes (structs/classes) in the translation unit.
@@ -51,6 +56,21 @@ final class TranslationUnit
      * @return iterable<Diagnostic>
      */
     public function diagnostics(): iterable {}
+}
+
+final class Cursor {
+    public function getKind(): int {}  // CParser\CursorKind::*
+    public function getSpelling(): string {}
+    public function getLocation(): array{} // ['file' => string, 'line' => int, 'column' => int]
+    public function getType(): Type {}
+    public function getCanonicalType(): Type {}
+    public function getEnumConstantValue(): int {}
+    public function getNumArguments(): int {}
+    public function getArgumentType(int $index): Type {}
+    public function isDefinition(): bool {}
+    public function isConstQualified(): bool {}
+    public function isVolatileQualified(): bool {}
+    public function isRestrictQualified(): bool {}
 }
 
 /**

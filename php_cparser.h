@@ -9,6 +9,7 @@ extern zend_module_entry cparser_module_entry;
 // Class entries
 // ---------------------------
 extern zend_class_entry *cparser_translationunit_ce;
+extern zend_class_entry *cparser_cursor_ce;
 extern zend_class_entry *cparser_classdecl_ce;
 extern zend_class_entry *cparser_enumconstant_ce;
 extern zend_class_entry *cparser_methoddecl_ce;
@@ -75,8 +76,9 @@ typedef struct _ast_cursor_iterator
     size_t pos;
 
     /* Keep a reference to the TranslationUnit PHP object so TU lives as long as iterator */
-    zval tu_obj; /* GC-refcounted zval containing the TU object */
-    ast_it_kind kind = AST_IT_CLASSES;
+    zval tu_obj;              /* GC-refcounted zval containing the TU object */
+    CXCursorKind filter_kind; // filter by this kind, or 0 for no filter
+    ast_it_kind kind;
 } ast_cursor_iterator;
 
 static inline ast_cursor_iterator *Z_AST_IT_P(zend_object *obj)
@@ -125,54 +127,17 @@ struct collect_data
     std::vector<CXCursor> vec;
 };
 
-/* visitor callback for classes */
-static enum CXChildVisitResult collect_classes_cb(CXCursor c, CXCursor parent, CXClientData client_data)
-{
-    collect_data *d = (collect_data *)client_data;
-    enum CXCursorKind kind = clang_getCursorKind(c);
-
-    if (kind == CXCursor_ClassDecl || kind == CXCursor_StructDecl)
-    {
-        if (clang_isCursorDefinition(c))
-        {
-            d->vec.push_back(c);
-        }
-    }
-
-    return CXChildVisit_Recurse;
-}
-
-/* visitor callback for enums */
-static enum CXChildVisitResult collect_enums_cb(CXCursor c, CXCursor parent, CXClientData client_data)
-{
-    collect_data *d = (collect_data *)client_data;
-    enum CXCursorKind kind = clang_getCursorKind(c);
-
-    if (kind == CXCursor_EnumDecl)
-    {
-        if (clang_isCursorDefinition(c))
-        {
-            d->vec.push_back(c);
-        }
-    }
-
-    return CXChildVisit_Recurse;
-}
-
 using cparser_tu = cparser_obj<CXTranslationUnit>;
 
 /* create and populate an iterator object for classes */
-static inline zval ast_create_iterator_from_tu(zval *tu_zv, ast_it_kind kind)
+static inline zval ast_create_iterator_from_tu(zval *tu_zv, int filter_kind)
 {
     zval it_obj;
     object_init_ex(&it_obj, cparser_classiterator_ce);
 
     ast_cursor_iterator *it = Z_AST_IT_P(Z_OBJ(it_obj));
-
-    /* Defensive init in case create_object didn't */
     if (!it)
     {
-        // Should not happen: if object_init_ex failed, return null zval to be safe.
         ZVAL_NULL(&it_obj);
         return it_obj;
     }
@@ -180,62 +145,49 @@ static inline zval ast_create_iterator_from_tu(zval *tu_zv, ast_it_kind kind)
     it->items = NULL;
     it->count = 0;
     it->pos = 0;
-    it->kind = kind;
-    ZVAL_UNDEF(&it->tu_obj);
+    it->filter_kind = (filter_kind > 0) ? (CXCursorKind)filter_kind : (CXCursorKind)0;
 
-    /* copy the TU zval so it remains alive while iterator exists */
+    ZVAL_UNDEF(&it->tu_obj);
     ZVAL_COPY(&it->tu_obj, tu_zv);
 
-    /* fetch native TU intern */
+    // Fetch the native TU
     cparser_tu *tu_intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(tu_zv));
     if (!tu_intern || !tu_intern->native)
     {
-        // empty iterator object, TU invalid
         return it_obj;
     }
 
     CXCursor root = clang_getTranslationUnitCursor(tu_intern->native);
+    std::vector<CXCursor> cursors;
 
-    collect_data cd;
-
-    switch (kind)
+    // Visitor that filters if filter_kind is set
+    auto visitor = [](CXCursor cursor, CXCursor /*parent*/, CXClientData client_data)
     {
-    case AST_IT_CLASSES:
-        clang_visitChildren(root, collect_classes_cb, &cd);
-        break;
-    case AST_IT_ENUMS:
-        clang_visitChildren(root, collect_enums_cb, &cd);
-        break;
-    // add more cases here...
-    default:
-        break;
-    }
+        auto *ctx = reinterpret_cast<std::pair<std::vector<CXCursor> *, CXCursorKind> *>(client_data);
+        CXCursorKind kind = clang_getCursorKind(cursor);
 
-    if (!cd.vec.empty())
-    {
-        size_t n = cd.vec.size();
-        it->items = (CXCursor *)emalloc(n * sizeof(CXCursor));
-        if (!it->items)
+        if (ctx->second < 1 || kind == ctx->second)
         {
-            // emalloc should either not return NULL or throw in PHP; guard anyway
-            it->count = 0;
-            it->pos = 0;
-            return it_obj;
+            ctx->first->push_back(cursor);
         }
-        it->count = n;
-        for (size_t i = 0; i < n; ++i)
-        {
-            it->items[i] = cd.vec[i]; // CXCursor is POD; copying is safe
-        }
-    }
-    else
+
+        return CXChildVisit_Continue;
+    };
+
+    std::pair<std::vector<CXCursor> *, CXCursorKind> context(&cursors, it->filter_kind);
+    clang_visitChildren(root, visitor, &context);
+
+    if (!cursors.empty())
     {
-        it->items = NULL;
-        it->count = 0;
+        it->count = cursors.size();
+        it->items = (CXCursor *)safe_emalloc(it->count, sizeof(CXCursor), 0);
+        for (size_t i = 0; i < it->count; ++i)
+        {
+            it->items[i] = cursors[i];
+        }
     }
 
     it->pos = 0;
-
     return it_obj;
 }
 

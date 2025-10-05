@@ -35,6 +35,7 @@ AS_VAR_IF([PHP_CPARSER], [no],, [
 
   cparser_source_files="cparser.cpp \
     src/TranslationUnit.cpp \
+    src/Cursor.cpp \
     src/ClassDecl.cpp \
     src/EnumConstant.cpp \
     src/MethodDecl.cpp \

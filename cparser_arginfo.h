@@ -1,11 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3cef693356b31c21c93ac30da72082ffaee54fb4 */
+ * Stub hash: 62634ccecca00362a011f6703f5df1e1bb27acf2 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CParser_ClassIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, tu, CParser\\TranslationUnit, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_CParser_ClassIterator_current, 0, 0, CParser\\ClassDecl|CParser\\EnumDecl, MAY_BE_NULL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CParser_ClassIterator_current, 0, 0, CParser\\Cursor, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CParser_ClassIterator_key, 0, 0, IS_LONG, 0)
@@ -24,6 +24,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CParser_TranslationUnit_fro
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_CParser_TranslationUnit_cursors, 0, 0, Traversable, MAY_BE_ARRAY)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, kind, IS_LONG, 0, "-1")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_CParser_TranslationUnit_classes, 0, 0, Traversable, MAY_BE_ARRAY)
 ZEND_END_ARG_INFO()
 
@@ -31,8 +35,36 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_CParser_TranslationUnit_diagnostics arginfo_class_CParser_TranslationUnit_classes
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CParser_ClassDecl_getName, 0, 0, IS_STRING, 0)
+#define arginfo_class_CParser_Cursor_getKind arginfo_class_CParser_ClassIterator_key
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CParser_Cursor_getSpelling, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CParser_Cursor_getLocation, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CParser_Cursor_getType, 0, 0, CParser\\Type, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CParser_Cursor_getCanonicalType arginfo_class_CParser_Cursor_getType
+
+#define arginfo_class_CParser_Cursor_getEnumConstantValue arginfo_class_CParser_ClassIterator_key
+
+#define arginfo_class_CParser_Cursor_getNumArguments arginfo_class_CParser_ClassIterator_key
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CParser_Cursor_getArgumentType, 0, 1, CParser\\Type, 0)
+	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CParser_Cursor_isDefinition arginfo_class_CParser_ClassIterator_valid
+
+#define arginfo_class_CParser_Cursor_isConstQualified arginfo_class_CParser_ClassIterator_valid
+
+#define arginfo_class_CParser_Cursor_isVolatileQualified arginfo_class_CParser_ClassIterator_valid
+
+#define arginfo_class_CParser_Cursor_isRestrictQualified arginfo_class_CParser_ClassIterator_valid
+
+#define arginfo_class_CParser_ClassDecl_getName arginfo_class_CParser_Cursor_getSpelling
 
 #define arginfo_class_CParser_ClassDecl_getBases arginfo_class_CParser_TranslationUnit_classes
 
@@ -46,12 +78,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_CParser_ClassDecl_isAbstract arginfo_class_CParser_ClassIterator_valid
 
-#define arginfo_class_CParser_MethodDecl_getName arginfo_class_CParser_ClassDecl_getName
+#define arginfo_class_CParser_MethodDecl_getName arginfo_class_CParser_Cursor_getSpelling
 
 #define arginfo_class_CParser_MethodDecl_getAccess arginfo_class_CParser_ClassIterator_key
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CParser_MethodDecl_getReturnType, 0, 0, CParser\\Type, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_CParser_MethodDecl_getReturnType arginfo_class_CParser_Cursor_getType
 
 #define arginfo_class_CParser_MethodDecl_getParameters arginfo_class_CParser_TranslationUnit_classes
 
@@ -67,13 +98,13 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_CParser_MethodDecl_isDestructor arginfo_class_CParser_ClassIterator_valid
 
-#define arginfo_class_CParser_MethodDecl_getSignature arginfo_class_CParser_ClassDecl_getName
+#define arginfo_class_CParser_MethodDecl_getSignature arginfo_class_CParser_Cursor_getSpelling
 
-#define arginfo_class_CParser_ParamDecl_getName arginfo_class_CParser_ClassDecl_getName
+#define arginfo_class_CParser_ParamDecl_getName arginfo_class_CParser_Cursor_getSpelling
 
-#define arginfo_class_CParser_ParamDecl_getType arginfo_class_CParser_MethodDecl_getReturnType
+#define arginfo_class_CParser_ParamDecl_getType arginfo_class_CParser_Cursor_getType
 
-#define arginfo_class_CParser_Type_toString arginfo_class_CParser_ClassDecl_getName
+#define arginfo_class_CParser_Type_toString arginfo_class_CParser_Cursor_getSpelling
 
 #define arginfo_class_CParser_Type_isConstQualified arginfo_class_CParser_ClassIterator_valid
 
@@ -84,38 +115,38 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CParser_Type_getPointeeType, 0, 0, CParser\\Type, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_CParser_Type_getCanonicalType arginfo_class_CParser_MethodDecl_getReturnType
+#define arginfo_class_CParser_Type_getCanonicalType arginfo_class_CParser_Cursor_getType
 
 #define arginfo_class_CParser_Type_isTemplateSpecialization arginfo_class_CParser_ClassIterator_valid
 
 #define arginfo_class_CParser_Type_getTemplateArguments arginfo_class_CParser_TranslationUnit_classes
 
-#define arginfo_class_CParser_TemplateDecl_getName arginfo_class_CParser_ClassDecl_getName
+#define arginfo_class_CParser_TemplateDecl_getName arginfo_class_CParser_Cursor_getSpelling
 
 #define arginfo_class_CParser_TemplateDecl_getParameters arginfo_class_CParser_TranslationUnit_classes
 
-#define arginfo_class_CParser_TemplateParameter_getName arginfo_class_CParser_ClassDecl_getName
+#define arginfo_class_CParser_TemplateParameter_getName arginfo_class_CParser_Cursor_getSpelling
 
-#define arginfo_class_CParser_TemplateParameter_getKind arginfo_class_CParser_ClassDecl_getName
+#define arginfo_class_CParser_TemplateParameter_getKind arginfo_class_CParser_Cursor_getSpelling
 
-#define arginfo_class_CParser_TemplateArgument_getKind arginfo_class_CParser_ClassDecl_getName
+#define arginfo_class_CParser_TemplateArgument_getKind arginfo_class_CParser_Cursor_getSpelling
 
 #define arginfo_class_CParser_TemplateArgument_getType arginfo_class_CParser_Type_getPointeeType
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_CParser_TemplateArgument_getValue, 0, 0, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_NULL)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_CParser_EnumDecl_getName arginfo_class_CParser_ClassDecl_getName
+#define arginfo_class_CParser_EnumDecl_getName arginfo_class_CParser_Cursor_getSpelling
 
 #define arginfo_class_CParser_EnumDecl_getConstants arginfo_class_CParser_TranslationUnit_classes
 
-#define arginfo_class_CParser_EnumDecl_getIntegerType arginfo_class_CParser_MethodDecl_getReturnType
+#define arginfo_class_CParser_EnumDecl_getIntegerType arginfo_class_CParser_Cursor_getType
 
-#define arginfo_class_CParser_EnumConstant_getName arginfo_class_CParser_ClassDecl_getName
+#define arginfo_class_CParser_EnumConstant_getName arginfo_class_CParser_Cursor_getSpelling
 
 #define arginfo_class_CParser_EnumConstant_getValue arginfo_class_CParser_ClassIterator_key
 
-#define arginfo_class_CParser_Diagnostic_getMessage arginfo_class_CParser_ClassDecl_getName
+#define arginfo_class_CParser_Diagnostic_getMessage arginfo_class_CParser_Cursor_getSpelling
 
 #define arginfo_class_CParser_Diagnostic_getSeverity arginfo_class_CParser_ClassIterator_key
 
@@ -130,9 +161,22 @@ ZEND_METHOD(CParser_ClassIterator, next);
 ZEND_METHOD(CParser_ClassIterator, rewind);
 ZEND_METHOD(CParser_ClassIterator, valid);
 ZEND_METHOD(CParser_TranslationUnit, fromFile);
+ZEND_METHOD(CParser_TranslationUnit, cursors);
 ZEND_METHOD(CParser_TranslationUnit, classes);
 ZEND_METHOD(CParser_TranslationUnit, enums);
 ZEND_METHOD(CParser_TranslationUnit, diagnostics);
+ZEND_METHOD(CParser_Cursor, getKind);
+ZEND_METHOD(CParser_Cursor, getSpelling);
+ZEND_METHOD(CParser_Cursor, getLocation);
+ZEND_METHOD(CParser_Cursor, getType);
+ZEND_METHOD(CParser_Cursor, getCanonicalType);
+ZEND_METHOD(CParser_Cursor, getEnumConstantValue);
+ZEND_METHOD(CParser_Cursor, getNumArguments);
+ZEND_METHOD(CParser_Cursor, getArgumentType);
+ZEND_METHOD(CParser_Cursor, isDefinition);
+ZEND_METHOD(CParser_Cursor, isConstQualified);
+ZEND_METHOD(CParser_Cursor, isVolatileQualified);
+ZEND_METHOD(CParser_Cursor, isRestrictQualified);
 ZEND_METHOD(CParser_ClassDecl, getName);
 ZEND_METHOD(CParser_ClassDecl, getBases);
 ZEND_METHOD(CParser_ClassDecl, methods);
@@ -190,9 +234,26 @@ static const zend_function_entry class_CParser_ClassIterator_methods[] = {
 
 static const zend_function_entry class_CParser_TranslationUnit_methods[] = {
 	ZEND_ME(CParser_TranslationUnit, fromFile, arginfo_class_CParser_TranslationUnit_fromFile, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(CParser_TranslationUnit, cursors, arginfo_class_CParser_TranslationUnit_cursors, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_TranslationUnit, classes, arginfo_class_CParser_TranslationUnit_classes, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_TranslationUnit, enums, arginfo_class_CParser_TranslationUnit_enums, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_TranslationUnit, diagnostics, arginfo_class_CParser_TranslationUnit_diagnostics, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_CParser_Cursor_methods[] = {
+	ZEND_ME(CParser_Cursor, getKind, arginfo_class_CParser_Cursor_getKind, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_Cursor, getSpelling, arginfo_class_CParser_Cursor_getSpelling, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_Cursor, getLocation, arginfo_class_CParser_Cursor_getLocation, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_Cursor, getType, arginfo_class_CParser_Cursor_getType, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_Cursor, getCanonicalType, arginfo_class_CParser_Cursor_getCanonicalType, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_Cursor, getEnumConstantValue, arginfo_class_CParser_Cursor_getEnumConstantValue, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_Cursor, getNumArguments, arginfo_class_CParser_Cursor_getNumArguments, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_Cursor, getArgumentType, arginfo_class_CParser_Cursor_getArgumentType, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_Cursor, isDefinition, arginfo_class_CParser_Cursor_isDefinition, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_Cursor, isConstQualified, arginfo_class_CParser_Cursor_isConstQualified, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_Cursor, isVolatileQualified, arginfo_class_CParser_Cursor_isVolatileQualified, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_Cursor, isRestrictQualified, arginfo_class_CParser_Cursor_isRestrictQualified, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -296,6 +357,16 @@ static zend_class_entry *register_class_CParser_TranslationUnit(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "CParser", "TranslationUnit", class_CParser_TranslationUnit_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_CParser_Cursor(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "CParser", "Cursor", class_CParser_Cursor_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	return class_entry;

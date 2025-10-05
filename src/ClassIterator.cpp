@@ -33,14 +33,7 @@ ZEND_METHOD(CParser_ClassIterator, current)
 
     /* Instantiate a ClassDecl PHP object and attach the cursor */
     zval obj;
-    if (it->kind == AST_IT_CLASSES)
-    {
-        object_init_ex(&obj, cparser_classdecl_ce);
-    }
-    else
-    {
-        object_init_ex(&obj, cparser_enumdecl_ce);
-    }
+    object_init_ex(&obj, cparser_cursor_ce);
 
     /* fetch intern and set native cursor */
     auto *intern = php_cparser_fetch<CXCursor>(Z_OBJ(obj));

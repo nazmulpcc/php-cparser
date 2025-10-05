@@ -66,11 +66,44 @@ ZEND_METHOD(CParser_TranslationUnit, fromFile)
     clang_disposeIndex(idx);
 }
 
+ZEND_METHOD(CParser_TranslationUnit, cursors)
+{
+    zend_long kind = -1;
+    ZEND_PARSE_PARAMETERS_START(0, 1)
+    Z_PARAM_OPTIONAL
+    Z_PARAM_LONG(kind)
+    ZEND_PARSE_PARAMETERS_END();
+
+    // Fetch TU intern
+    cparser_tu *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(getThis()));
+    if (!intern || !intern->native)
+    {
+        RETURN_FALSE;
+    }
+
+    // Create iterator object
+    zval it = ast_create_iterator_from_tu(getThis(), kind);
+
+    ast_cursor_iterator *ait = Z_AST_IT_P(Z_OBJ(it));
+    if (!ait)
+    {
+        RETURN_FALSE;
+    }
+
+    Z_TRY_ADDREF_P(getThis());
+    ZVAL_OBJ_COPY(&ait->tu_obj, Z_OBJ_P(getThis()));
+
+    if (kind >= 0)
+    {
+        ait->filter_kind = (CXCursorKind)kind;
+    }
+
+    RETURN_ZVAL(&it, 0, 1);
+}
+
 ZEND_METHOD(CParser_TranslationUnit, classes)
 {
-    ZEND_PARSE_PARAMETERS_NONE();
-    zval it = ast_create_iterator_from_tu(getThis(), AST_IT_CLASSES);
-    RETURN_ZVAL(&it, 0, 1);
+    //
 }
 
 ZEND_METHOD(CParser_TranslationUnit, enums)
