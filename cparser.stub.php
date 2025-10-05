@@ -58,12 +58,15 @@ final class TranslationUnit
     public function diagnostics(): iterable {}
 }
 
-final class Cursor {
+class Cursor {
     /** Kind of cursor (e.g. function, class, field, etc.) */
     public function getKind(): int {}  // CParser\CursorKind::*
 
     /** The display name or spelling of the cursor */
     public function getSpelling(): string {}
+
+    /** The human-readable name of the cursor (may include extra info) */
+    public function getDisplayName(): string {}
 
     /** Source location of this cursor */
     public function getLocation(): array {} // ['file' => string|null, 'line' => int, 'column' => int]
@@ -82,6 +85,67 @@ final class Cursor {
 
     /** Get immediate child cursors (lazy, depth = 1) */
     public function getChildren(int $kind = -1): iterable {}
+}
+
+final class ClassCursor extends Cursor {
+    /** @return iterable<ClassCursor> */
+    public function getBases(): iterable {}
+    /** @return iterable<MethodCursor> */
+    public function getMethods(): iterable {}
+    /** @return iterable<FieldCursor> */
+    public function getFields(): iterable {}
+    /** @return iterable<ClassCursor> */
+    public function getInnerClasses(): iterable {}
+    /** @return iterable<EnumCursor> */
+    public function getEnums(): iterable {}
+    public function isAbstract(): bool {}
+    public function isStruct(): bool {}
+}
+
+final class MethodCursor extends Cursor {
+    public function getReturnType(): Type {}
+    /** @return iterable<ParameterCursor> */
+    public function getParameters(): iterable {}
+    public function isStatic(): bool {}
+    public function isConst(): bool {}
+    public function isVirtual(): bool {}
+    public function isPureVirtual(): bool {}
+    public function getAccessSpecifier(): ?string {}
+}
+
+final class FunctionCursor extends Cursor {
+    public function getReturnType(): Type {}
+    /** @return iterable<ParameterCursor> */
+    public function getParameters(): iterable {}
+    public function getNumArguments(): int {}
+}
+
+final class FieldCursor extends Cursor {
+    public function getAccessSpecifier(): ?string {}
+    public function isStatic(): bool {}
+}
+
+final class EnumCursor extends Cursor {
+    /** @return iterable<EnumConstantCursor> */
+    public function getConstants(): iterable {}
+    public function getIntegerType(): Type {}
+}
+
+final class EnumConstantCursor extends Cursor {
+    public function getValue(): int|float|string {}
+}
+
+final class ParameterCursor extends Cursor {
+    public function isConstQualified(): bool {}
+    public function hasDefaultValue(): bool {}
+}
+
+final class NamespaceCursor extends Cursor {
+    //
+}
+
+final class TypeAliasCursor extends Cursor {
+    public function getUnderlyingType(): Type {}
 }
 
 /**

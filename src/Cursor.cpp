@@ -5,8 +5,72 @@ extern "C"
 }
 
 #include "php_cparser.h"
+#include "NativeCXCursorIterator.h"
 
 using cparser_cursor = cparser_obj<CXCursor>;
+
+// get specific cursor object given a CXCursor
+void cparser_create_cursor(CXCursor *cursor, zval *return_value)
+{
+    zend_class_entry *ce = nullptr;
+    CXCursorKind kind = clang_getCursorKind(*cursor);
+
+    switch (kind)
+    {
+    case CXCursor_ClassDecl:
+    case CXCursor_StructDecl:
+        ce = cparser_classcursor_ce;
+        break;
+    case CXCursor_CXXMethod:
+        ce = cparser_methodcursor_ce;
+        break;
+    case CXCursor_FunctionDecl:
+        ce = cparser_functioncursor_ce;
+        break;
+    case CXCursor_FieldDecl:
+        ce = cparser_fieldcursor_ce;
+        break;
+    case CXCursor_EnumDecl:
+        ce = cparser_enumcursor_ce;
+        break;
+    case CXCursor_EnumConstantDecl:
+        ce = cparser_enumconstantcursor_ce;
+        break;
+    case CXCursor_ParmDecl:
+        ce = cparser_parametercursor_ce;
+        break;
+    case CXCursor_Namespace:
+        ce = cparser_namespacecursor_ce;
+        break;
+    case CXCursor_TypeAliasDecl:
+    case CXCursor_TypedefDecl:
+        ce = cparser_typealiascursor_ce;
+        break;
+    default:
+        ce = cparser_cursor_ce;
+        break;
+    }
+
+    object_init_ex(return_value, ce);
+    php_cparser_fetch<CXCursor>(Z_OBJ_P(return_value))->native = *cursor;
+}
+
+CXCursor cparser_cursor_get_first_child(CXCursor parent)
+{
+    CXCursor first = clang_getNullCursor();
+
+    clang_visitChildren(
+        parent,
+        [](CXCursor c, CXCursor /*parent*/, CXClientData client_data)
+        {
+            CXCursor *out = reinterpret_cast<CXCursor *>(client_data);
+            *out = c;
+            return CXChildVisit_Break; // Stop after first child
+        },
+        &first);
+
+    return first;
+}
 
 ZEND_METHOD(CParser_Cursor, getKind)
 {
@@ -28,6 +92,23 @@ ZEND_METHOD(CParser_Cursor, getSpelling)
         RETURN_NULL();
 
     CXString cxstr = clang_getCursorSpelling(intern->native);
+    const char *cstr = clang_getCString(cxstr);
+    if (cstr)
+        RETVAL_STRING(cstr);
+    else
+        RETVAL_EMPTY_STRING();
+    clang_disposeString(cxstr);
+}
+
+ZEND_METHOD(CParser_Cursor, getDisplayName)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+
+    CXString cxstr = clang_getCursorDisplayName(intern->native);
     const char *cstr = clang_getCString(cxstr);
     if (cstr)
         RETVAL_STRING(cstr);
@@ -105,8 +186,7 @@ ZEND_METHOD(CParser_Cursor, getCanonical)
         RETURN_NULL();
 
     CXCursor canonical = clang_getCanonicalCursor(intern->native);
-    object_init_ex(return_value, cparser_cursor_ce);
-    php_cparser_fetch<CXCursor>(Z_OBJ_P(return_value))->native = canonical;
+    cparser_create_cursor(&canonical, return_value);
 }
 
 ZEND_METHOD(CParser_Cursor, getParent)
@@ -118,8 +198,7 @@ ZEND_METHOD(CParser_Cursor, getParent)
         RETURN_NULL();
 
     CXCursor parent = clang_getCursorSemanticParent(intern->native);
-    object_init_ex(return_value, cparser_cursor_ce);
-    php_cparser_fetch<CXCursor>(Z_OBJ_P(return_value))->native = parent;
+    cparser_create_cursor(&parent, return_value);
 }
 
 ZEND_METHOD(CParser_Cursor, getChildren)
@@ -132,22 +211,301 @@ ZEND_METHOD(CParser_Cursor, getChildren)
     ZEND_PARSE_PARAMETERS_END();
 
     zval it_obj;
-    object_init_ex(&it_obj, cparser_classiterator_ce);
-    auto it = Z_AST_IT_P(Z_OBJ(it_obj));
-    ZVAL_OBJ_COPY(&it->source_obj, Z_OBJ_P(getThis()));
+    object_init_ex(&it_obj, cparser_cursoriterator_ce);
+    auto *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+
+    auto *it = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ(it_obj));
+    //
+
+    RETURN_ZVAL(&it_obj, 0, 1);
+}
+
+ZEND_METHOD(CParser_ClassCursor, getBases)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    //
+}
+
+ZEND_METHOD(CParser_ClassCursor, getMethods)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    //
+}
+
+ZEND_METHOD(CParser_ClassCursor, getFields)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    //
+}
+
+ZEND_METHOD(CParser_ClassCursor, getInnerClasses)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    //
+}
+
+ZEND_METHOD(CParser_ClassCursor, getEnums)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    //
+}
+
+ZEND_METHOD(CParser_ClassCursor, isAbstract)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    RETURN_BOOL(clang_CXXRecord_isAbstract(intern->native));
+}
+
+ZEND_METHOD(CParser_ClassCursor, isStruct)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    RETURN_BOOL(clang_getCursorKind(intern->native) == CXCursor_StructDecl);
+}
+
+ZEND_METHOD(CParser_MethodCursor, getReturnType)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    CXType t = clang_getCursorResultType(intern->native);
+    object_init_ex(return_value, cparser_type_ce);
+    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
+}
+
+ZEND_METHOD(CParser_MethodCursor, getParameters)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    //
+}
+
+ZEND_METHOD(CParser_MethodCursor, isStatic)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    RETURN_BOOL(clang_CXXMethod_isStatic(intern->native));
+}
+
+ZEND_METHOD(CParser_MethodCursor, isConst)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    RETURN_BOOL(clang_CXXMethod_isConst(intern->native));
+}
+
+ZEND_METHOD(CParser_MethodCursor, isVirtual)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    RETURN_BOOL(clang_CXXMethod_isVirtual(intern->native));
+}
+
+ZEND_METHOD(CParser_MethodCursor, isPureVirtual)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    RETURN_BOOL(clang_CXXMethod_isPureVirtual(intern->native));
+}
+
+ZEND_METHOD(CParser_MethodCursor, getAccessSpecifier)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    RETURN_LONG((zend_long)clang_getCXXAccessSpecifier(intern->native));
+}
+
+ZEND_METHOD(CParser_FunctionCursor, getReturnType)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    CXType t = clang_getCursorResultType(intern->native);
+    object_init_ex(return_value, cparser_type_ce);
+    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
+}
+
+ZEND_METHOD(CParser_FunctionCursor, getParameters)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    //
+}
+
+ZEND_METHOD(CParser_FunctionCursor, getNumArguments)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    int n = clang_Cursor_getNumArguments(intern->native);
+    RETURN_LONG(n);
+}
+
+ZEND_METHOD(CParser_FieldCursor, getType)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    CXType t = clang_getCursorType(intern->native);
+    object_init_ex(return_value, cparser_type_ce);
+    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
+}
+
+ZEND_METHOD(CParser_FieldCursor, getAccessSpecifier)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    RETURN_LONG((zend_long)clang_getCXXAccessSpecifier(intern->native));
+}
+
+ZEND_METHOD(CParser_FieldCursor, isStatic)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    RETURN_BOOL(clang_Cursor_getStorageClass(intern->native) == CX_SC_Static);
+}
+
+ZEND_METHOD(CParser_EnumCursor, getConstants)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    //
+}
+
+ZEND_METHOD(CParser_EnumCursor, getIntegerType)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    CXType t = clang_getEnumDeclIntegerType(intern->native);
+    object_init_ex(return_value, cparser_type_ce);
+    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
+}
+
+ZEND_METHOD(CParser_EnumConstantCursor, getValue)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    long long val = clang_getEnumConstantDeclValue(intern->native);
+    RETURN_LONG(val);
+}
+
+ZEND_METHOD(CParser_ParameterCursor, getType)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    CXType t = clang_getCursorType(intern->native);
+    object_init_ex(return_value, cparser_type_ce);
+    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
+}
+
+ZEND_METHOD(CParser_ParameterCursor, isConstQualified)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    CXType t = clang_getCursorType(intern->native);
+    RETURN_BOOL(clang_isConstQualifiedType(t));
+}
+
+ZEND_METHOD(CParser_ParameterCursor, hasDefaultValue)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
 
     cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
     if (!intern)
         RETURN_NULL();
 
-    // Initialize iterator root and state
-    it->root = intern->native;
-    while (!it->stack.empty())
-        it->stack.pop();
-    it->stack.push(it->root);
+    CXCursor cur = intern->native;
+    CXTranslationUnit tu = clang_Cursor_getTranslationUnit(cur);
 
-    it->done = false;
-    it->filter_kind = (int)filter_kind;
+    // Quick heuristic: if the parameter cursor has any expression child, it
+    // very likely represents a default argument (e.g. IntegerLiteral, CallExpr...).
+    bool has_expr_child = false;
+    clang_visitChildren(
+        cur,
+        [](CXCursor c, CXCursor parent, CXClientData client_data)
+        {
+            bool *found = reinterpret_cast<bool *>(client_data);
+            CXCursorKind k = clang_getCursorKind(c);
+            if (clang_isExpression(k))
+            {
+                *found = true;
+                return CXChildVisit_Break;
+            }
+            return CXChildVisit_Continue;
+        },
+        &has_expr_child);
 
-    RETURN_ZVAL(&it_obj, 0, 1);
+    if (has_expr_child)
+    {
+        RETURN_BOOL(true);
+    }
+
+    // Fallback: tokenize the source range for the parameter and look for an
+    // '=' punctuation token which indicates a default value was written.
+    CXSourceRange range = clang_getCursorExtent(cur);
+    CXToken *tokens = nullptr;
+    unsigned numTokens = 0;
+
+    clang_tokenize(tu, range, &tokens, &numTokens);
+    bool has_default = false;
+    for (unsigned i = 0; i < numTokens; ++i)
+    {
+        CXString ts = clang_getTokenSpelling(tu, tokens[i]);
+        const char *tstr = clang_getCString(ts);
+        if (tstr && strcmp(tstr, "=") == 0)
+        {
+            has_default = true;
+            clang_disposeString(ts);
+            break;
+        }
+        clang_disposeString(ts);
+    }
+
+    if (tokens)
+    {
+        clang_disposeTokens(tu, tokens, numTokens);
+    }
+
+    RETURN_BOOL(has_default);
+}
+
+ZEND_METHOD(CParser_TypeAliasCursor, getUnderlyingType)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    CXType t = clang_getTypedefDeclUnderlyingType(intern->native);
+    object_init_ex(return_value, cparser_type_ce);
+    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
 }

@@ -84,19 +84,7 @@ ZEND_METHOD(CParser_TranslationUnit, cursors)
     // Create iterator object
     zval it = ast_create_iterator_from_tu(getThis(), kind);
 
-    ast_cursor_iterator *ait = Z_AST_IT_P(Z_OBJ(it));
-    if (!ait)
-    {
-        RETURN_FALSE;
-    }
-
-    Z_TRY_ADDREF_P(getThis());
-    ZVAL_OBJ_COPY(&ait->source_obj, Z_OBJ_P(getThis()));
-
-    if (kind >= 0)
-    {
-        ait->filter_kind = (CXCursorKind)kind;
-    }
+    // @todo implement NativeCXCursorIterator and set it to the iterator object
 
     RETURN_ZVAL(&it, 0, 1);
 }
