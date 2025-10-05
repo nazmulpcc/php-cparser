@@ -46,6 +46,23 @@ static void register_cparser_ce_handlers(zend_class_entry *ce)
 	ce->default_object_handlers = &handlers;
 }
 
+void register_cursorkind_constants(zend_class_entry *ce, int start, int end)
+{
+	for (int i = start; i <= end; i++)
+	{
+		const char *name = clang_getCString(clang_getCursorKindSpelling((enum CXCursorKind)i));
+		if (name && name[0] != '\0')
+		{
+			// check if constant already defined to avoid redefinition warnings
+			if (zend_hash_str_exists(&ce->constants_table, name, strlen(name)))
+			{
+				continue;
+			}
+			zend_declare_class_constant_long(ce, name, strlen(name), i);
+		}
+	}
+}
+
 PHP_MINIT_FUNCTION(cparser)
 {
 	cparser_translationunit_ce = register_class_CParser_TranslationUnit();
@@ -90,17 +107,10 @@ PHP_MINIT_FUNCTION(cparser)
 	cparser_classiterator_ce->default_object_handlers = &cparser_classiterator_object_handlers;
 
 	cparser_cursorkind_ce = register_class_CParser_CursorKind();
-
-	// register CXCursorKind constants in CursorKind class
-	for (int i = 0; i <= CXCursor_LastDecl; i++)
-	{
-		const char *name = clang_getCString(clang_getCursorKindSpelling((enum CXCursorKind)i));
-		if (name && name[0] != '\0')
-		{
-			// php_printf("Registering CursorKind constant: %s = %d\n", name, i);
-			zend_declare_class_constant_long(cparser_cursorkind_ce, name, strlen(name), i);
-		}
-	}
+	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstDecl, CXCursor_LastDecl);
+	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstRef, CXCursor_LastRef);
+	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstInvalid, CXCursor_LastInvalid);
+	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstExpr, CXCursor_LastExpr);
 
 	return SUCCESS;
 }
