@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c435367d13d3becc3b71ead3e466ba07b7fb45b8 */
+ * Stub hash: 7a3eff66ab2299a0b04d34fc9f2a69be1557e52a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CParser_CursorIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, tu, CParser\\TranslationUnit, 0)

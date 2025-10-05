@@ -55,22 +55,14 @@ void cparser_create_cursor(CXCursor *cursor, zval *return_value)
     php_cparser_fetch<CXCursor>(Z_OBJ_P(return_value))->native = *cursor;
 }
 
-CXCursor cparser_cursor_get_first_child(CXCursor parent)
-{
-    CXCursor first = clang_getNullCursor();
-
-    clang_visitChildren(
-        parent,
-        [](CXCursor c, CXCursor /*parent*/, CXClientData client_data)
-        {
-            CXCursor *out = reinterpret_cast<CXCursor *>(client_data);
-            *out = c;
-            return CXChildVisit_Break; // Stop after first child
-        },
-        &first);
-
-    return first;
-}
+#define RETURN_CURSOR_WITH_FILTER(kind)                                              \
+    do                                                                               \
+    {                                                                                \
+        object_init_ex(return_value, cparser_cursoriterator_ce);                     \
+        auto *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));              \
+        auto *it = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(return_value)); \
+        it->native = NativeCXCursorIterator(intern->native, kind, false);            \
+    } while (0);
 
 ZEND_METHOD(CParser_Cursor, getKind)
 {
@@ -210,46 +202,42 @@ ZEND_METHOD(CParser_Cursor, getChildren)
     Z_PARAM_LONG(filter_kind)
     ZEND_PARSE_PARAMETERS_END();
 
-    zval it_obj;
-    object_init_ex(&it_obj, cparser_cursoriterator_ce);
-    auto *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
-    if (!intern)
-        RETURN_NULL();
-
-    auto *it = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ(it_obj));
-    //
-
-    RETURN_ZVAL(&it_obj, 0, 1);
+    RETURN_CURSOR_WITH_FILTER(filter_kind);
 }
 
 ZEND_METHOD(CParser_ClassCursor, getBases)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    //
+
+    RETURN_CURSOR_WITH_FILTER(CXCursor_CXXBaseSpecifier);
 }
 
 ZEND_METHOD(CParser_ClassCursor, getMethods)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    //
+
+    RETURN_CURSOR_WITH_FILTER(CXCursor_CXXMethod);
 }
 
 ZEND_METHOD(CParser_ClassCursor, getFields)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    //
+
+    RETURN_CURSOR_WITH_FILTER(CXCursor_FieldDecl);
 }
 
 ZEND_METHOD(CParser_ClassCursor, getInnerClasses)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    //
+
+    RETURN_CURSOR_WITH_FILTER(CXCursor_ClassDecl);
 }
 
 ZEND_METHOD(CParser_ClassCursor, getEnums)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    //
+
+    RETURN_CURSOR_WITH_FILTER(CXCursor_EnumDecl);
 }
 
 ZEND_METHOD(CParser_ClassCursor, isAbstract)
@@ -284,7 +272,8 @@ ZEND_METHOD(CParser_MethodCursor, getReturnType)
 ZEND_METHOD(CParser_MethodCursor, getParameters)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    //
+
+    RETURN_CURSOR_WITH_FILTER(CXCursor_ParmDecl);
 }
 
 ZEND_METHOD(CParser_MethodCursor, isStatic)
@@ -346,7 +335,8 @@ ZEND_METHOD(CParser_FunctionCursor, getReturnType)
 ZEND_METHOD(CParser_FunctionCursor, getParameters)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    //
+
+    RETURN_CURSOR_WITH_FILTER(CXCursor_ParmDecl);
 }
 
 ZEND_METHOD(CParser_FunctionCursor, getNumArguments)
@@ -391,7 +381,8 @@ ZEND_METHOD(CParser_FieldCursor, isStatic)
 ZEND_METHOD(CParser_EnumCursor, getConstants)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    //
+
+    RETURN_CURSOR_WITH_FILTER(CXCursor_EnumConstantDecl);
 }
 
 ZEND_METHOD(CParser_EnumCursor, getIntegerType)

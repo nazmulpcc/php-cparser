@@ -83,7 +83,11 @@ class Cursor {
     /** The parent cursor (e.g. the class that contains a method) */
     public function getParent(): ?Cursor {}
 
-    /** Get immediate child cursors (lazy, depth = 1) */
+    /**
+     * Get child cursors of this cursor, optionally filtered by kind.
+     * @param int $kind  Cursor kind to filter by, or -1 for all kinds (CParser\CursorKind::*)
+     * @return iterable<Cursor>
+    */
     public function getChildren(int $kind = -1): iterable {}
 }
 

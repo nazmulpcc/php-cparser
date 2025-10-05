@@ -33,7 +33,6 @@ extern zend_class_entry *cparser_cursoriterator_ce;
 #include <stack>
 
 void cparser_create_cursor(CXCursor *cursor, zval *return_value);
-CXCursor cparser_cursor_get_first_child(CXCursor parent);
 
 template <typename T>
 struct cparser_obj
