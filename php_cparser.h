@@ -40,20 +40,24 @@ inline cparser_obj<T> *php_cparser_fetch(zend_object *obj)
 template <typename T>
 zend_object *cparser_object_create(zend_class_entry *ce)
 {
-    cparser_obj<T> *intern = (cparser_obj<T> *)ecalloc(
-        1,
-        sizeof(cparser_obj<T>) + zend_object_properties_size(ce));
+    size_t sz = sizeof(cparser_obj<T>) + zend_object_properties_size(ce);
+    cparser_obj<T> *intern = (cparser_obj<T> *)ecalloc(1, sz);
+
     zend_object_std_init(&intern->std, ce);
     object_properties_init(&intern->std, ce);
-    intern->std.handlers = &std_object_handlers;
+
+    intern->std.handlers = ce->default_object_handlers;
+
     return &intern->std;
 }
 
 template <typename T>
-void cparser_object_free(zend_object *obj)
+void cparser_object_free(zend_object *object)
 {
-    // If T requires manual cleanup, specialize this template
-    zend_object_std_dtor(obj);
+    if (!object)
+        return;
+    cparser_obj<T> *intern = (cparser_obj<T> *)((char *)object - XtOffsetOf(cparser_obj<T>, std));
+    zend_object_std_dtor(object);
 }
 
 typedef enum

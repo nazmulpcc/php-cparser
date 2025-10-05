@@ -11,7 +11,7 @@ namespace CParser;
 final class ClassIterator implements \Iterator
 {
     public function __construct(TranslationUnit $tu) {}
-    public function current(): ?ClassDecl {}
+    public function current(): ClassDecl|EnumDecl|null {}
     public function key(): int {}
     public function next(): void {}
     public function rewind(): void {}
@@ -193,4 +193,8 @@ final class Access
     public const int Public = 1;
     public const int Protected = 2;
     public const int Private = 3;
+}
+
+final class CursorKind {
+    //
 }

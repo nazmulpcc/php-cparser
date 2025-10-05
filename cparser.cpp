@@ -29,51 +29,78 @@ zend_class_entry *cparser_templateargument_ce = nullptr;
 zend_class_entry *cparser_enumdecl_ce = nullptr;
 zend_class_entry *cparser_diagnostic_ce = nullptr;
 zend_class_entry *cparser_classiterator_ce = nullptr;
+zend_class_entry *cparser_cursorkind_ce = nullptr;
+
+static zend_object_handlers cparser_classiterator_object_handlers;
+
+template <typename NativeType>
+static void register_cparser_ce_handlers(zend_class_entry *ce)
+{
+	static zend_object_handlers handlers;
+	memcpy(&handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+
+	handlers.offset = XtOffsetOf(cparser_obj<NativeType>, std);
+	handlers.free_obj = cparser_object_free<NativeType>;
+
+	ce->create_object = cparser_object_create<NativeType>;
+	ce->default_object_handlers = &handlers;
+}
 
 PHP_MINIT_FUNCTION(cparser)
 {
-	// TranslationUnit
 	cparser_translationunit_ce = register_class_CParser_TranslationUnit();
-	cparser_translationunit_ce->create_object = cparser_object_create<CXTranslationUnit>;
+	register_cparser_ce_handlers<CXTranslationUnit>(cparser_translationunit_ce);
 
-	// ClassDecl
 	cparser_classdecl_ce = register_class_CParser_ClassDecl();
-	cparser_classdecl_ce->create_object = cparser_object_create<CXCursor>;
+	register_cparser_ce_handlers<CXCursor>(cparser_classdecl_ce);
 
-	// EnumConstant
 	cparser_enumconstant_ce = register_class_CParser_EnumConstant();
-	cparser_enumconstant_ce->create_object = cparser_object_create<CXCursor>;
+	register_cparser_ce_handlers<CXCursor>(cparser_enumconstant_ce);
 
-	// MethodDecl
 	cparser_methoddecl_ce = register_class_CParser_MethodDecl();
-	cparser_methoddecl_ce->create_object = cparser_object_create<CXCursor>;
+	register_cparser_ce_handlers<CXCursor>(cparser_methoddecl_ce);
 
-	// ParamDecl
 	cparser_paramdecl_ce = register_class_CParser_ParamDecl();
-	cparser_paramdecl_ce->create_object = cparser_object_create<CXCursor>;
+	register_cparser_ce_handlers<CXCursor>(cparser_paramdecl_ce);
 
-	// Type
 	cparser_type_ce = register_class_CParser_Type();
-	cparser_type_ce->create_object = cparser_object_create<CXType>;
+	register_cparser_ce_handlers<CXType>(cparser_type_ce);
 
 	cparser_templatedecl_ce = register_class_CParser_TemplateDecl();
-	cparser_templatedecl_ce->create_object = cparser_object_create<CXCursor>;
+	register_cparser_ce_handlers<CXCursor>(cparser_templatedecl_ce);
 
 	cparser_templateparameter_ce = register_class_CParser_TemplateParameter();
-	cparser_templateparameter_ce->create_object = cparser_object_create<CXCursor>;
+	register_cparser_ce_handlers<CXCursor>(cparser_templateparameter_ce);
 
 	cparser_templateargument_ce = register_class_CParser_TemplateArgument();
-	cparser_templateargument_ce->create_object = cparser_object_create<CXType>;
-	// note: could also be CXCursor if I need non-type args later
+	register_cparser_ce_handlers<CXType>(cparser_templateargument_ce);
 
 	cparser_enumdecl_ce = register_class_CParser_EnumDecl();
-	cparser_enumdecl_ce->create_object = cparser_object_create<CXCursor>;
+	register_cparser_ce_handlers<CXCursor>(cparser_enumdecl_ce);
 
 	cparser_diagnostic_ce = register_class_CParser_Diagnostic();
-	cparser_diagnostic_ce->create_object = cparser_object_create<CXDiagnostic>;
+	register_cparser_ce_handlers<CXDiagnostic>(cparser_diagnostic_ce);
 
+	// ClassIterator
 	cparser_classiterator_ce = register_class_CParser_ClassIterator(zend_ce_iterator);
-	cparser_classiterator_ce->create_object = cparser_object_create<ast_cursor_iterator>;
+	cparser_classiterator_ce->create_object = ast_cursor_iterator_create;
+	memcpy(&cparser_classiterator_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	cparser_classiterator_object_handlers.offset = XtOffsetOf(ast_cursor_iterator, std);
+	cparser_classiterator_object_handlers.free_obj = ast_cursor_iterator_free;
+	cparser_classiterator_ce->default_object_handlers = &cparser_classiterator_object_handlers;
+
+	cparser_cursorkind_ce = register_class_CParser_CursorKind();
+
+	// register CXCursorKind constants in CursorKind class
+	for (int i = 0; i <= CXCursor_LastDecl; i++)
+	{
+		const char *name = clang_getCString(clang_getCursorKindSpelling((enum CXCursorKind)i));
+		if (name && name[0] != '\0')
+		{
+			// php_printf("Registering CursorKind constant: %s = %d\n", name, i);
+			zend_declare_class_constant_long(cparser_cursorkind_ce, name, strlen(name), i);
+		}
+	}
 
 	return SUCCESS;
 }

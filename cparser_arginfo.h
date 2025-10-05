@@ -1,11 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3cf5ef64aea7b11ab9cfd84a20e733ee159489eb */
+ * Stub hash: 3cef693356b31c21c93ac30da72082ffaee54fb4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CParser_ClassIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, tu, CParser\\TranslationUnit, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CParser_ClassIterator_current, 0, 0, CParser\\ClassDecl, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_CParser_ClassIterator_current, 0, 0, CParser\\ClassDecl|CParser\\EnumDecl, MAY_BE_NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CParser_ClassIterator_key, 0, 0, IS_LONG, 0)
@@ -425,6 +425,16 @@ static zend_class_entry *register_class_CParser_Access(void)
 	zend_string *const_Private_name = zend_string_init_interned("Private", sizeof("Private") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_Private_name, &const_Private_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_Private_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_CParser_CursorKind(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "CParser", "CursorKind", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	return class_entry;
 }
