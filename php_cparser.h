@@ -25,6 +25,7 @@ extern zend_class_entry *cparser_classiterator_ce;
 #ifdef __cplusplus
 
 #include <clang-c/Index.h>
+#include <stack>
 template <typename T>
 struct cparser_obj
 {
@@ -68,17 +69,12 @@ typedef enum
 } ast_it_kind;
 typedef struct _ast_cursor_iterator
 {
+    std::stack<CXCursor> stack;
+    CXCursor current;
+    bool done;
+    zval tu_obj;
+    int filter_kind;
     zend_object std;
-
-    /* Copy of CXCursor entries collected at creation time */
-    CXCursor *items;
-    size_t count;
-    size_t pos;
-
-    /* Keep a reference to the TranslationUnit PHP object so TU lives as long as iterator */
-    zval tu_obj;              /* GC-refcounted zval containing the TU object */
-    CXCursorKind filter_kind; // filter by this kind, or 0 for no filter
-    ast_it_kind kind;
 } ast_cursor_iterator;
 
 static inline ast_cursor_iterator *Z_AST_IT_P(zend_object *obj)
@@ -90,10 +86,10 @@ static void ast_cursor_iterator_free(zend_object *object)
 {
     ast_cursor_iterator *it = Z_AST_IT_P(object);
 
-    if (it->items)
+    // Clear the stack safely
+    while (!it->stack.empty())
     {
-        efree(it->items);
-        it->items = NULL;
+        it->stack.pop();
     }
 
     /* release reference to TU object */
@@ -113,9 +109,7 @@ static zend_object *ast_cursor_iterator_create(zend_class_entry *ce)
     object_properties_init(&it->std, ce);
 
     it->std.handlers = zend_get_std_object_handlers();
-    it->items = NULL;
-    it->count = 0;
-    it->pos = 0;
+    it->done = false;
     ZVAL_UNDEF(&it->tu_obj);
 
     return &it->std;
@@ -142,10 +136,7 @@ static inline zval ast_create_iterator_from_tu(zval *tu_zv, int filter_kind)
         return it_obj;
     }
 
-    it->items = NULL;
-    it->count = 0;
-    it->pos = 0;
-    it->filter_kind = (filter_kind > 0) ? (CXCursorKind)filter_kind : (CXCursorKind)0;
+    it->filter_kind = filter_kind;
 
     ZVAL_UNDEF(&it->tu_obj);
     ZVAL_COPY(&it->tu_obj, tu_zv);
@@ -158,36 +149,15 @@ static inline zval ast_create_iterator_from_tu(zval *tu_zv, int filter_kind)
     }
 
     CXCursor root = clang_getTranslationUnitCursor(tu_intern->native);
-    std::vector<CXCursor> cursors;
 
-    // Visitor that filters if filter_kind is set
-    auto visitor = [](CXCursor cursor, CXCursor /*parent*/, CXClientData client_data)
+    // Initialize stack with the root cursor for lazy iteration
+    while (!it->stack.empty())
     {
-        auto *ctx = reinterpret_cast<std::pair<std::vector<CXCursor> *, CXCursorKind> *>(client_data);
-        CXCursorKind kind = clang_getCursorKind(cursor);
-
-        if (ctx->second < 1 || kind == ctx->second)
-        {
-            ctx->first->push_back(cursor);
-        }
-
-        return CXChildVisit_Continue;
-    };
-
-    std::pair<std::vector<CXCursor> *, CXCursorKind> context(&cursors, it->filter_kind);
-    clang_visitChildren(root, visitor, &context);
-
-    if (!cursors.empty())
-    {
-        it->count = cursors.size();
-        it->items = (CXCursor *)safe_emalloc(it->count, sizeof(CXCursor), 0);
-        for (size_t i = 0; i < it->count; ++i)
-        {
-            it->items[i] = cursors[i];
-        }
+        it->stack.pop();
     }
+    it->stack.push(root);
+    it->done = false;
 
-    it->pos = 0;
     return it_obj;
 }
 
