@@ -31,22 +31,16 @@ AS_VAR_IF([PHP_CPARSER], [no],, [
   PHP_EVAL_LIBLINE($LIBCLANG_LIBS, CPARSER_SHARED_LIBADD)
 
   LDFLAGS="$LDFLAGS $LIBCLANG_LIBS"
-  export LDFLAGS
 
   cparser_source_files="cparser.cpp \
     src/TranslationUnit.cpp \
     src/Cursor.cpp \
-    src/ClassDecl.cpp \
-    src/EnumConstant.cpp \
-    src/MethodDecl.cpp \
-    src/ParamDecl.cpp \
     src/Type.cpp \
     src/TemplateDecl.cpp \
     src/TemplateParameter.cpp \
     src/TemplateArgument.cpp \
-    src/EnumDecl.cpp \
     src/Diagnostic.cpp \
-    src/ClassIterator.cpp"
+    src/CursorIterator.cpp"
   
   PHP_NEW_EXTENSION([cparser],
     $cparser_source_files,

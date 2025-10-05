@@ -8,7 +8,7 @@ namespace CParser;
  * @template T of ClassDecl
  * @implements \Iterator<int, T>
  */
-final class ClassIterator implements \Iterator
+final class CursorIterator implements \Iterator
 {
     public function __construct(TranslationUnit $tu) {}
     public function current(): Cursor|null {}
@@ -85,63 +85,6 @@ final class Cursor {
 }
 
 /**
- * A class/struct declaration.
- */
-final class ClassDecl
-{
-    public function getName(): string {}
-
-    /** @return iterable<string> Fully qualified base class names */
-    public function getBases(): iterable {}
-
-    /** @return iterable<MethodDecl> */
-    public function methods(): iterable {}
-
-    /** @return iterable<ClassDecl> Inner classes */
-    public function innerClasses(): iterable {}
-
-    /** @return iterable<EnumDecl> Enums declared inside the class */
-    public function enums(): iterable {}
-
-    /** @return iterable<TemplateDecl> Templates declared inside the class */
-    public function templates(): iterable {}
-
-    public function isAbstract(): bool {}
-}
-
-/**
- * A function or method declaration.
- */
-final class MethodDecl
-{
-    public function getName(): string {}
-    public function getAccess(): int {}   // CParser\Access::Public, etc.
-    public function getReturnType(): Type {}
-
-    /** @return iterable<ParamDecl> */
-    public function getParameters(): iterable {}
-
-    public function isStatic(): bool {}
-    public function isConst(): bool {}
-    public function isVirtual(): bool {}
-    public function isPureVirtual(): bool {}
-    public function isConstructor(): bool {}
-    public function isDestructor(): bool {}
-
-    /** Fully formatted signature string */
-    public function getSignature(): string {}
-}
-
-/**
- * A function or method parameter.
- */
-final class ParamDecl
-{
-    public function getName(): string {}
-    public function getType(): Type {}
-}
-
-/**
  * Represents a C-family type.
  */
 final class Type
@@ -184,25 +127,6 @@ final class TemplateArgument
     public function getKind(): string {}
     public function getType(): ?Type {}
     public function getValue(): int|string|float|null {}
-}
-
-/**
- * An enum declaration.
- */
-final class EnumDecl
-{
-    public function getName(): string {}
-
-    /** @return iterable<EnumConstant> */
-    public function getConstants(): iterable {}
-
-    public function getIntegerType(): Type {}
-}
-
-final class EnumConstant
-{
-    public function getName(): string {}
-    public function getValue(): int {}
 }
 
 /**

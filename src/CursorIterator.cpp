@@ -9,7 +9,7 @@ extern "C"
 
 #include "php_cparser.h"
 
-ZEND_METHOD(CParser_ClassIterator, __construct)
+ZEND_METHOD(CParser_CursorIterator, __construct)
 {
     zval *source;
     zend_long filter_kind = -1;
@@ -56,7 +56,7 @@ ZEND_METHOD(CParser_ClassIterator, __construct)
     }
 }
 
-ZEND_METHOD(CParser_ClassIterator, current)
+ZEND_METHOD(CParser_CursorIterator, current)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     ast_cursor_iterator *it = Z_AST_IT_P(Z_OBJ_P(getThis()));
@@ -77,14 +77,14 @@ ZEND_METHOD(CParser_ClassIterator, current)
     RETURN_ZVAL(&obj, 1, 1);
 }
 
-ZEND_METHOD(CParser_ClassIterator, key)
+ZEND_METHOD(CParser_CursorIterator, key)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     /* There is no meaningful numeric key in lazy DFS; return 0 for compatibility */
     RETURN_LONG(0);
 }
 
-ZEND_METHOD(CParser_ClassIterator, next)
+ZEND_METHOD(CParser_CursorIterator, next)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     ast_cursor_iterator *it = Z_AST_IT_P(Z_OBJ_P(getThis()));
@@ -130,7 +130,7 @@ ZEND_METHOD(CParser_ClassIterator, next)
     RETURN_NULL();
 }
 
-ZEND_METHOD(CParser_ClassIterator, rewind)
+ZEND_METHOD(CParser_CursorIterator, rewind)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     ast_cursor_iterator *it = Z_AST_IT_P(Z_OBJ_P(getThis()));
@@ -177,7 +177,7 @@ ZEND_METHOD(CParser_ClassIterator, rewind)
     RETURN_NULL();
 }
 
-ZEND_METHOD(CParser_ClassIterator, valid)
+ZEND_METHOD(CParser_CursorIterator, valid)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     ast_cursor_iterator *it = Z_AST_IT_P(Z_OBJ_P(getThis()));

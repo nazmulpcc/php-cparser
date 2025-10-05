@@ -19,15 +19,10 @@
 
 zend_class_entry *cparser_translationunit_ce = nullptr;
 zend_class_entry *cparser_cursor_ce = nullptr;
-zend_class_entry *cparser_classdecl_ce = nullptr;
-zend_class_entry *cparser_enumconstant_ce = nullptr;
-zend_class_entry *cparser_methoddecl_ce = nullptr;
-zend_class_entry *cparser_paramdecl_ce = nullptr;
 zend_class_entry *cparser_type_ce = nullptr;
 zend_class_entry *cparser_templatedecl_ce = nullptr;
 zend_class_entry *cparser_templateparameter_ce = nullptr;
 zend_class_entry *cparser_templateargument_ce = nullptr;
-zend_class_entry *cparser_enumdecl_ce = nullptr;
 zend_class_entry *cparser_diagnostic_ce = nullptr;
 zend_class_entry *cparser_classiterator_ce = nullptr;
 zend_class_entry *cparser_cursorkind_ce = nullptr;
@@ -72,18 +67,6 @@ PHP_MINIT_FUNCTION(cparser)
 	cparser_cursor_ce = register_class_CParser_Cursor();
 	register_cparser_ce_handlers<CXCursor>(cparser_cursor_ce);
 
-	cparser_classdecl_ce = register_class_CParser_ClassDecl();
-	register_cparser_ce_handlers<CXCursor>(cparser_classdecl_ce);
-
-	cparser_enumconstant_ce = register_class_CParser_EnumConstant();
-	register_cparser_ce_handlers<CXCursor>(cparser_enumconstant_ce);
-
-	cparser_methoddecl_ce = register_class_CParser_MethodDecl();
-	register_cparser_ce_handlers<CXCursor>(cparser_methoddecl_ce);
-
-	cparser_paramdecl_ce = register_class_CParser_ParamDecl();
-	register_cparser_ce_handlers<CXCursor>(cparser_paramdecl_ce);
-
 	cparser_type_ce = register_class_CParser_Type();
 	register_cparser_ce_handlers<CXType>(cparser_type_ce);
 
@@ -96,14 +79,11 @@ PHP_MINIT_FUNCTION(cparser)
 	cparser_templateargument_ce = register_class_CParser_TemplateArgument();
 	register_cparser_ce_handlers<CXType>(cparser_templateargument_ce);
 
-	cparser_enumdecl_ce = register_class_CParser_EnumDecl();
-	register_cparser_ce_handlers<CXCursor>(cparser_enumdecl_ce);
-
 	cparser_diagnostic_ce = register_class_CParser_Diagnostic();
 	register_cparser_ce_handlers<CXDiagnostic>(cparser_diagnostic_ce);
 
-	// ClassIterator
-	cparser_classiterator_ce = register_class_CParser_ClassIterator(zend_ce_iterator);
+	// CursorIterator
+	cparser_classiterator_ce = register_class_CParser_CursorIterator(zend_ce_iterator);
 	cparser_classiterator_ce->create_object = ast_cursor_iterator_create;
 	memcpy(&cparser_classiterator_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	cparser_classiterator_object_handlers.offset = XtOffsetOf(ast_cursor_iterator, std);

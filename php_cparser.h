@@ -10,10 +10,6 @@ extern zend_module_entry cparser_module_entry;
 // ---------------------------
 extern zend_class_entry *cparser_translationunit_ce;
 extern zend_class_entry *cparser_cursor_ce;
-extern zend_class_entry *cparser_classdecl_ce;
-extern zend_class_entry *cparser_enumconstant_ce;
-extern zend_class_entry *cparser_methoddecl_ce;
-extern zend_class_entry *cparser_paramdecl_ce;
 extern zend_class_entry *cparser_type_ce;
 extern zend_class_entry *cparser_templatedecl_ce;
 extern zend_class_entry *cparser_templateparameter_ce;
