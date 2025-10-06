@@ -114,7 +114,7 @@ final class MethodCursor extends Cursor {
     public function isConst(): bool {}
     public function isVirtual(): bool {}
     public function isPureVirtual(): bool {}
-    public function getAccessSpecifier(): ?string {}
+    public function getAccessSpecifier(): ?int {}
 }
 
 final class FunctionCursor extends Cursor {

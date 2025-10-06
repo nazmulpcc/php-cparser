@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7a3eff66ab2299a0b04d34fc9f2a69be1557e52a */
+ * Stub hash: 8894ef6c4d54ca58a402400226adbfc63ba3636d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CParser_CursorIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, tu, CParser\\TranslationUnit, 0)
@@ -83,7 +83,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_CParser_MethodCursor_isPureVirtual arginfo_class_CParser_CursorIterator_valid
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CParser_MethodCursor_getAccessSpecifier, 0, 0, IS_STRING, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CParser_MethodCursor_getAccessSpecifier, 0, 0, IS_LONG, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_CParser_FunctionCursor_getReturnType arginfo_class_CParser_MethodCursor_getReturnType
@@ -92,7 +92,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_CParser_FunctionCursor_getNumArguments arginfo_class_CParser_CursorIterator_key
 
-#define arginfo_class_CParser_FieldCursor_getAccessSpecifier arginfo_class_CParser_MethodCursor_getAccessSpecifier
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CParser_FieldCursor_getAccessSpecifier, 0, 0, IS_STRING, 1)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_CParser_FieldCursor_isStatic arginfo_class_CParser_CursorIterator_valid
 

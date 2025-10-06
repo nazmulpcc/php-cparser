@@ -122,6 +122,8 @@ PHP_MINIT_FUNCTION(cparser)
 	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstInvalid, CXCursor_LastInvalid);
 	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstExpr, CXCursor_LastExpr);
 
+	register_class_CParser_Access();
+
 	return SUCCESS;
 }
 
