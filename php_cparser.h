@@ -70,6 +70,15 @@ void cparser_object_free(zend_object *object)
     zend_object_std_dtor(object);
 }
 
+static inline int cparser_compare_cursors(zval *object1, zval *object2)
+{
+    cparser_obj<CXCursor> *intern1 = php_cparser_fetch<CXCursor>(Z_OBJ_P(object1));
+    cparser_obj<CXCursor> *intern2 = php_cparser_fetch<CXCursor>(Z_OBJ_P(object2));
+    if (clang_equalCursors(intern1->native, intern2->native))
+        return 0;
+    return 1;
+}
+
 #endif
 
 #endif /* PHP_CPARSER_H */

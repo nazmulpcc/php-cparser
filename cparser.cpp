@@ -42,7 +42,7 @@ zend_class_entry *cparser_cursorkind_ce = nullptr;
 static zend_object_handlers cparser_classiterator_object_handlers;
 
 template <typename NativeType>
-static void register_cparser_ce_handlers(zend_class_entry *ce)
+void register_cparser_ce_handlers(zend_class_entry *ce)
 {
 	static zend_object_handlers handlers;
 	memcpy(&handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -51,6 +51,20 @@ static void register_cparser_ce_handlers(zend_class_entry *ce)
 	handlers.free_obj = cparser_object_free<NativeType>;
 
 	ce->create_object = cparser_object_create<NativeType>;
+	ce->default_object_handlers = &handlers;
+}
+
+template <>
+void register_cparser_ce_handlers<CXCursor>(zend_class_entry *ce)
+{
+	static zend_object_handlers handlers;
+	memcpy(&handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+
+	handlers.offset = XtOffsetOf(cparser_obj<CXCursor>, std);
+	handlers.free_obj = cparser_object_free<CXCursor>;
+	handlers.compare = cparser_compare_cursors;
+
+	ce->create_object = cparser_object_create<CXCursor>;
 	ce->default_object_handlers = &handlers;
 }
 
