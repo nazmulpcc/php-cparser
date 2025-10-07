@@ -18,6 +18,26 @@ final class CursorIterator implements \Iterator
     public function valid(): bool {}
 }
 
+final class TranslationUnitFlags {
+    public const int None = 0x0;
+    public const int DetailedPreprocessingRecord = 0x01;
+    public const int Incomplete = 0x02;
+    public const int PrecompiledPreamble = 0x04;
+    public const int CacheCompletionResults = 0x08;
+    public const int ForSerialization = 0x10;
+    public const int CXXChainedPCH = 0x20;
+    public const int SkipFunctionBodies = 0x40;
+    public const int IncludeBriefCommentsInCodeCompletion = 0x80;
+    public const int CreatePreambleOnFirstParse = 0x100;
+    public const int KeepGoing = 0x200;
+    public const int SingleFileParse = 0x400;
+    public const int LimitSkipFunctionBodiesToPreamble = 0x800;
+    public const int IncludeAttributedTypes = 0x1000;
+    public const int VisitImplicitAttributes = 0x2000;
+    public const int IgnoreNonErrorsFromIncludedFiles = 0x4000;
+    public const int RetainExcludedConditionalBlocks = 0x8000;
+}
+
 /**
  * Represents a parsed translation unit (a source or header file).
  */
@@ -29,7 +49,7 @@ final class TranslationUnit
      * @param string $filename  Path to the C-family source/header file
      * @param array $args  Compiler flags (e.g. ["-std=c11", "-Iinclude"])
      */
-    public static function fromFile(string $filename, array $args = []): TranslationUnit {}
+    public static function fromFile(string $filename, array $args = [], int $flags = TranslationUnitFlags::None): TranslationUnit {}
 
     /**
      * @return iterable<Cursor>
@@ -39,14 +59,14 @@ final class TranslationUnit
     /**
      * Lazily yield all top-level classes (structs/classes) in the translation unit.
      *
-     * @return iterable<ClassDecl>
+     * @return iterable<ClassCursor>
      */
     public function classes(): iterable {}
 
     /**
      * Lazily yield all top-level enums in the translation unit.
      *
-     * @return iterable<EnumDecl>
+     * @return iterable<EnumCrursor>
      */
     public function enums(): iterable {}
 

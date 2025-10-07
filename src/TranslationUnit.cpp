@@ -31,11 +31,13 @@ ZEND_METHOD(CParser_TranslationUnit, fromFile)
     char *filename;
     size_t filename_len;
     zval *args = NULL;
+    zend_long flags = 0;
 
-    ZEND_PARSE_PARAMETERS_START(1, 2)
+    ZEND_PARSE_PARAMETERS_START(1, 3)
     Z_PARAM_PATH(filename, filename_len)
     Z_PARAM_OPTIONAL
     Z_PARAM_ARRAY(args)
+    Z_PARAM_LONG(flags)
     ZEND_PARSE_PARAMETERS_END();
 
     // Extract args into C array of const char*
@@ -61,7 +63,7 @@ ZEND_METHOD(CParser_TranslationUnit, fromFile)
         cargs.empty() ? nullptr : cargs.data(),
         (int)cargs.size(),
         nullptr, 0,
-        CXTranslationUnit_None);
+        flags);
 
     if (!tu)
     {

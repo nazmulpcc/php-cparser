@@ -73,6 +73,7 @@ void register_cursorkind_constants(zend_class_entry *ce, int start, int end)
 
 PHP_MINIT_FUNCTION(cparser)
 {
+	register_class_CParser_TranslationUnitFlags();
 	cparser_translationunit_ce = register_class_CParser_TranslationUnit();
 	register_cparser_ce_handlers<CXTranslationUnit>(cparser_translationunit_ce);
 

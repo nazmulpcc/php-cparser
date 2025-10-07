@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8894ef6c4d54ca58a402400226adbfc63ba3636d */
+ * Stub hash: c18505b8c05f7daa21b8d0f0417f3d2a370d2cab */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CParser_CursorIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, tu, CParser\\TranslationUnit, 0)
@@ -22,6 +22,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CParser_TranslationUnit_fromFile, 0, 1, CParser\\TranslationUnit, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "CParser\\TranslationUnitFlags::None")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_CParser_TranslationUnit_cursors, 0, 0, Traversable, MAY_BE_ARRAY)
@@ -349,6 +350,118 @@ static zend_class_entry *register_class_CParser_CursorIterator(zend_class_entry 
 	INIT_NS_CLASS_ENTRY(ce, "CParser", "CursorIterator", class_CParser_CursorIterator_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_CParser_TranslationUnitFlags(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "CParser", "TranslationUnitFlags", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+
+	zval const_None_value;
+	ZVAL_LONG(&const_None_value, 0x0);
+	zend_string *const_None_name = zend_string_init_interned("None", sizeof("None") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_None_name, &const_None_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_None_name);
+
+	zval const_DetailedPreprocessingRecord_value;
+	ZVAL_LONG(&const_DetailedPreprocessingRecord_value, 0x1);
+	zend_string *const_DetailedPreprocessingRecord_name = zend_string_init_interned("DetailedPreprocessingRecord", sizeof("DetailedPreprocessingRecord") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_DetailedPreprocessingRecord_name, &const_DetailedPreprocessingRecord_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_DetailedPreprocessingRecord_name);
+
+	zval const_Incomplete_value;
+	ZVAL_LONG(&const_Incomplete_value, 0x2);
+	zend_string *const_Incomplete_name = zend_string_init_interned("Incomplete", sizeof("Incomplete") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_Incomplete_name, &const_Incomplete_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_Incomplete_name);
+
+	zval const_PrecompiledPreamble_value;
+	ZVAL_LONG(&const_PrecompiledPreamble_value, 0x4);
+	zend_string *const_PrecompiledPreamble_name = zend_string_init_interned("PrecompiledPreamble", sizeof("PrecompiledPreamble") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_PrecompiledPreamble_name, &const_PrecompiledPreamble_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_PrecompiledPreamble_name);
+
+	zval const_CacheCompletionResults_value;
+	ZVAL_LONG(&const_CacheCompletionResults_value, 0x8);
+	zend_string *const_CacheCompletionResults_name = zend_string_init_interned("CacheCompletionResults", sizeof("CacheCompletionResults") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_CacheCompletionResults_name, &const_CacheCompletionResults_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_CacheCompletionResults_name);
+
+	zval const_ForSerialization_value;
+	ZVAL_LONG(&const_ForSerialization_value, 0x10);
+	zend_string *const_ForSerialization_name = zend_string_init_interned("ForSerialization", sizeof("ForSerialization") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ForSerialization_name, &const_ForSerialization_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ForSerialization_name);
+
+	zval const_CXXChainedPCH_value;
+	ZVAL_LONG(&const_CXXChainedPCH_value, 0x20);
+	zend_string *const_CXXChainedPCH_name = zend_string_init_interned("CXXChainedPCH", sizeof("CXXChainedPCH") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_CXXChainedPCH_name, &const_CXXChainedPCH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_CXXChainedPCH_name);
+
+	zval const_SkipFunctionBodies_value;
+	ZVAL_LONG(&const_SkipFunctionBodies_value, 0x40);
+	zend_string *const_SkipFunctionBodies_name = zend_string_init_interned("SkipFunctionBodies", sizeof("SkipFunctionBodies") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_SkipFunctionBodies_name, &const_SkipFunctionBodies_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_SkipFunctionBodies_name);
+
+	zval const_IncludeBriefCommentsInCodeCompletion_value;
+	ZVAL_LONG(&const_IncludeBriefCommentsInCodeCompletion_value, 0x80);
+	zend_string *const_IncludeBriefCommentsInCodeCompletion_name = zend_string_init_interned("IncludeBriefCommentsInCodeCompletion", sizeof("IncludeBriefCommentsInCodeCompletion") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IncludeBriefCommentsInCodeCompletion_name, &const_IncludeBriefCommentsInCodeCompletion_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IncludeBriefCommentsInCodeCompletion_name);
+
+	zval const_CreatePreambleOnFirstParse_value;
+	ZVAL_LONG(&const_CreatePreambleOnFirstParse_value, 0x100);
+	zend_string *const_CreatePreambleOnFirstParse_name = zend_string_init_interned("CreatePreambleOnFirstParse", sizeof("CreatePreambleOnFirstParse") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_CreatePreambleOnFirstParse_name, &const_CreatePreambleOnFirstParse_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_CreatePreambleOnFirstParse_name);
+
+	zval const_KeepGoing_value;
+	ZVAL_LONG(&const_KeepGoing_value, 0x200);
+	zend_string *const_KeepGoing_name = zend_string_init_interned("KeepGoing", sizeof("KeepGoing") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_KeepGoing_name, &const_KeepGoing_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_KeepGoing_name);
+
+	zval const_SingleFileParse_value;
+	ZVAL_LONG(&const_SingleFileParse_value, 0x400);
+	zend_string *const_SingleFileParse_name = zend_string_init_interned("SingleFileParse", sizeof("SingleFileParse") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_SingleFileParse_name, &const_SingleFileParse_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_SingleFileParse_name);
+
+	zval const_LimitSkipFunctionBodiesToPreamble_value;
+	ZVAL_LONG(&const_LimitSkipFunctionBodiesToPreamble_value, 0x800);
+	zend_string *const_LimitSkipFunctionBodiesToPreamble_name = zend_string_init_interned("LimitSkipFunctionBodiesToPreamble", sizeof("LimitSkipFunctionBodiesToPreamble") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_LimitSkipFunctionBodiesToPreamble_name, &const_LimitSkipFunctionBodiesToPreamble_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_LimitSkipFunctionBodiesToPreamble_name);
+
+	zval const_IncludeAttributedTypes_value;
+	ZVAL_LONG(&const_IncludeAttributedTypes_value, 0x1000);
+	zend_string *const_IncludeAttributedTypes_name = zend_string_init_interned("IncludeAttributedTypes", sizeof("IncludeAttributedTypes") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IncludeAttributedTypes_name, &const_IncludeAttributedTypes_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IncludeAttributedTypes_name);
+
+	zval const_VisitImplicitAttributes_value;
+	ZVAL_LONG(&const_VisitImplicitAttributes_value, 0x2000);
+	zend_string *const_VisitImplicitAttributes_name = zend_string_init_interned("VisitImplicitAttributes", sizeof("VisitImplicitAttributes") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_VisitImplicitAttributes_name, &const_VisitImplicitAttributes_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_VisitImplicitAttributes_name);
+
+	zval const_IgnoreNonErrorsFromIncludedFiles_value;
+	ZVAL_LONG(&const_IgnoreNonErrorsFromIncludedFiles_value, 0x4000);
+	zend_string *const_IgnoreNonErrorsFromIncludedFiles_name = zend_string_init_interned("IgnoreNonErrorsFromIncludedFiles", sizeof("IgnoreNonErrorsFromIncludedFiles") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IgnoreNonErrorsFromIncludedFiles_name, &const_IgnoreNonErrorsFromIncludedFiles_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IgnoreNonErrorsFromIncludedFiles_name);
+
+	zval const_RetainExcludedConditionalBlocks_value;
+	ZVAL_LONG(&const_RetainExcludedConditionalBlocks_value, 0x8000);
+	zend_string *const_RetainExcludedConditionalBlocks_name = zend_string_init_interned("RetainExcludedConditionalBlocks", sizeof("RetainExcludedConditionalBlocks") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_RetainExcludedConditionalBlocks_name, &const_RetainExcludedConditionalBlocks_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_RetainExcludedConditionalBlocks_name);
 
 	return class_entry;
 }
