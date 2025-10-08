@@ -130,8 +130,11 @@ final class MethodCursor extends Cursor {
     public function getReturnType(): Type {}
     /** @return iterable<ParameterCursor> */
     public function getParameters(): iterable {}
+    /** @return array<int,MethodCursor> */
+    public function getBaseMethods(): array {}
     public function isStatic(): bool {}
     public function isConst(): bool {}
+    public function isOverride(): bool {}
     public function isVirtual(): bool {}
     public function isPureVirtual(): bool {}
     public function getAccessSpecifier(): ?int {}

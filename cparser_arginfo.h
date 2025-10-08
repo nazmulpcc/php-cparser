@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c18505b8c05f7daa21b8d0f0417f3d2a370d2cab */
+ * Stub hash: f24f0e2f1f6748902d5f8d71ddc4a5fcb296cb96 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CParser_CursorIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, tu, CParser\\TranslationUnit, 0)
@@ -76,9 +76,13 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_CParser_MethodCursor_getParameters arginfo_class_CParser_TranslationUnit_classes
 
+#define arginfo_class_CParser_MethodCursor_getBaseMethods arginfo_class_CParser_Cursor_getLocation
+
 #define arginfo_class_CParser_MethodCursor_isStatic arginfo_class_CParser_CursorIterator_valid
 
 #define arginfo_class_CParser_MethodCursor_isConst arginfo_class_CParser_CursorIterator_valid
+
+#define arginfo_class_CParser_MethodCursor_isOverride arginfo_class_CParser_CursorIterator_valid
 
 #define arginfo_class_CParser_MethodCursor_isVirtual arginfo_class_CParser_CursorIterator_valid
 
@@ -179,8 +183,10 @@ ZEND_METHOD(CParser_ClassCursor, isAbstract);
 ZEND_METHOD(CParser_ClassCursor, isStruct);
 ZEND_METHOD(CParser_MethodCursor, getReturnType);
 ZEND_METHOD(CParser_MethodCursor, getParameters);
+ZEND_METHOD(CParser_MethodCursor, getBaseMethods);
 ZEND_METHOD(CParser_MethodCursor, isStatic);
 ZEND_METHOD(CParser_MethodCursor, isConst);
+ZEND_METHOD(CParser_MethodCursor, isOverride);
 ZEND_METHOD(CParser_MethodCursor, isVirtual);
 ZEND_METHOD(CParser_MethodCursor, isPureVirtual);
 ZEND_METHOD(CParser_MethodCursor, getAccessSpecifier);
@@ -261,8 +267,10 @@ static const zend_function_entry class_CParser_ClassCursor_methods[] = {
 static const zend_function_entry class_CParser_MethodCursor_methods[] = {
 	ZEND_ME(CParser_MethodCursor, getReturnType, arginfo_class_CParser_MethodCursor_getReturnType, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_MethodCursor, getParameters, arginfo_class_CParser_MethodCursor_getParameters, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_MethodCursor, getBaseMethods, arginfo_class_CParser_MethodCursor_getBaseMethods, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_MethodCursor, isStatic, arginfo_class_CParser_MethodCursor_isStatic, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_MethodCursor, isConst, arginfo_class_CParser_MethodCursor_isConst, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_MethodCursor, isOverride, arginfo_class_CParser_MethodCursor_isOverride, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_MethodCursor, isVirtual, arginfo_class_CParser_MethodCursor_isVirtual, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_MethodCursor, isPureVirtual, arginfo_class_CParser_MethodCursor_isPureVirtual, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_MethodCursor, getAccessSpecifier, arginfo_class_CParser_MethodCursor_getAccessSpecifier, ZEND_ACC_PUBLIC)

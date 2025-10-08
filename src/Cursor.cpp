@@ -276,6 +276,30 @@ ZEND_METHOD(CParser_MethodCursor, getParameters)
     RETURN_CURSOR_WITH_FILTER(CXCursor_ParmDecl);
 }
 
+ZEND_METHOD(CParser_MethodCursor, getBaseMethods)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+
+    auto *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+
+    CXCursor *overridden = nullptr;
+    unsigned num = 0;
+    clang_getOverriddenCursors(intern->native, &overridden, &num);
+
+    array_init(return_value);
+
+    for (unsigned i = 0; i < num; ++i)
+    {
+        zval zcursor;
+        cparser_create_cursor(&overridden[i], &zcursor);
+        add_next_index_zval(return_value, &zcursor);
+    }
+
+    clang_disposeOverriddenCursors(overridden);
+}
+
 ZEND_METHOD(CParser_MethodCursor, isStatic)
 {
     ZEND_PARSE_PARAMETERS_NONE();
@@ -292,6 +316,19 @@ ZEND_METHOD(CParser_MethodCursor, isConst)
     if (!intern)
         RETURN_NULL();
     RETURN_BOOL(clang_CXXMethod_isConst(intern->native));
+}
+
+ZEND_METHOD(CParser_MethodCursor, isOverride)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    CXCursor *overridden = nullptr;
+    unsigned num = 0;
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+    clang_getOverriddenCursors(intern->native, &overridden, &num);
+    clang_disposeOverriddenCursors(overridden);
+    RETURN_BOOL(num > 0);
 }
 
 ZEND_METHOD(CParser_MethodCursor, isVirtual)
