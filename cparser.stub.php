@@ -52,6 +52,8 @@ final class TranslationUnit
     public static function fromFile(string $filename, array $args = [], int $flags = TranslationUnitFlags::None): TranslationUnit {}
 
     /**
+     * Recursively traverse all cursors in the translation unit (depth-first).
+     *
      * @return iterable<Cursor>
      */
     public function cursors(int $kind = -1): iterable {}
@@ -104,7 +106,7 @@ class Cursor {
     public function getParent(): ?Cursor {}
 
     /**
-     * Get child cursors of this cursor, optionally filtered by kind.
+     * Get direct child cursors of this cursor, optionally filtered by kind.
      * @param int $kind  Cursor kind to filter by, or -1 for all kinds (CParser\CursorKind::*)
      * @return iterable<Cursor>
     */
@@ -112,15 +114,15 @@ class Cursor {
 }
 
 final class ClassCursor extends Cursor {
-    /** @return iterable<ClassCursor> */
+    /** Recursively yields matching descendants. @return iterable<ClassCursor> */
     public function getBases(): iterable {}
-    /** @return iterable<MethodCursor> */
+    /** Recursively yields matching descendants. @return iterable<MethodCursor> */
     public function getMethods(): iterable {}
-    /** @return iterable<FieldCursor> */
+    /** Recursively yields matching descendants. @return iterable<FieldCursor> */
     public function getFields(): iterable {}
-    /** @return iterable<ClassCursor> */
+    /** Recursively yields matching descendants. @return iterable<ClassCursor> */
     public function getInnerClasses(): iterable {}
-    /** @return iterable<EnumCursor> */
+    /** Recursively yields matching descendants. @return iterable<EnumCursor> */
     public function getEnums(): iterable {}
     public function isAbstract(): bool {}
     public function isStruct(): bool {}
