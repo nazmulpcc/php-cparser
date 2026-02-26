@@ -14,6 +14,7 @@ private:
     CXCursor root;
     bool done;
     int filter_kind;
+    int alt_filter_kind;
     bool include_root;
     bool recursive;
     zend_long index;
@@ -52,12 +53,21 @@ private:
         {
             return true;
         }
-        return clang_getCursorKind(cursor) == (CXCursorKind)filter_kind;
+        CXCursorKind kind = clang_getCursorKind(cursor);
+        if (kind == (CXCursorKind)filter_kind)
+        {
+            return true;
+        }
+        if (alt_filter_kind > 0 && kind == (CXCursorKind)alt_filter_kind)
+        {
+            return true;
+        }
+        return false;
     }
 
 public:
-    NativeCXCursorIterator(CXCursor root, int filter_kind = 0, bool include_root = false, bool recursive = true)
-        : root(root), done(false), filter_kind(filter_kind), include_root(include_root), recursive(recursive), index(0)
+    NativeCXCursorIterator(CXCursor root, int filter_kind = 0, bool include_root = false, bool recursive = true, int alt_filter_kind = 0)
+        : root(root), done(false), filter_kind(filter_kind), alt_filter_kind(alt_filter_kind), include_root(include_root), recursive(recursive), index(0)
     {
         rewind();
     }

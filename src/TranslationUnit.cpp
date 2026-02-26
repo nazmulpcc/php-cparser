@@ -105,59 +105,27 @@ ZEND_METHOD(CParser_TranslationUnit, classes)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     cparser_tu *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(getThis()));
-    if (!intern || !intern->native)
-    {
-        array_init(return_value);
-        return;
-    }
-
-    CXCursor root = clang_getTranslationUnitCursor(intern->native);
-    array_init(return_value);
-
-    clang_visitChildren(
-        root,
-        [](CXCursor c, CXCursor /*parent*/, CXClientData client_data)
-        {
-            zval *retval = static_cast<zval *>(client_data);
-            CXCursorKind k = clang_getCursorKind(c);
-            if (k == CXCursor_ClassDecl || k == CXCursor_StructDecl)
-            {
-                zval zv;
-                cparser_create_cursor(&c, &zv);
-                add_next_index_zval(retval, &zv);
-            }
-            return CXChildVisit_Continue;
-        },
-        return_value);
+    object_init_ex(return_value, cparser_cursoriterator_ce);
+    auto *it_intern = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(return_value));
+    it_intern->native = NativeCXCursorIterator(
+        clang_getTranslationUnitCursor(intern->native),
+        (int)CXCursor_ClassDecl,
+        false,
+        false,
+        (int)CXCursor_StructDecl);
 }
 
 ZEND_METHOD(CParser_TranslationUnit, enums)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     cparser_tu *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(getThis()));
-    if (!intern || !intern->native)
-    {
-        array_init(return_value);
-        return;
-    }
-
-    CXCursor root = clang_getTranslationUnitCursor(intern->native);
-    array_init(return_value);
-
-    clang_visitChildren(
-        root,
-        [](CXCursor c, CXCursor /*parent*/, CXClientData client_data)
-        {
-            zval *retval = static_cast<zval *>(client_data);
-            if (clang_getCursorKind(c) == CXCursor_EnumDecl)
-            {
-                zval zv;
-                cparser_create_cursor(&c, &zv);
-                add_next_index_zval(retval, &zv);
-            }
-            return CXChildVisit_Continue;
-        },
-        return_value);
+    object_init_ex(return_value, cparser_cursoriterator_ce);
+    auto *it_intern = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(return_value));
+    it_intern->native = NativeCXCursorIterator(
+        clang_getTranslationUnitCursor(intern->native),
+        (int)CXCursor_EnumDecl,
+        false,
+        false);
 }
 
 ZEND_METHOD(CParser_TranslationUnit, diagnostics)
