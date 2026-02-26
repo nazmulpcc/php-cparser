@@ -10,7 +10,7 @@ namespace CParser;
  */
 final class CursorIterator implements \Iterator
 {
-    public function __construct(TranslationUnit $tu) {}
+    public function __construct(TranslationUnit|Cursor $source, int $filter_kind = -1) {}
     public function current(): Cursor|null {}
     public function key(): int {}
     public function next(): void {}
@@ -148,7 +148,7 @@ final class FunctionCursor extends Cursor {
 }
 
 final class FieldCursor extends Cursor {
-    public function getAccessSpecifier(): ?string {}
+    public function getAccessSpecifier(): ?int {}
     public function isStatic(): bool {}
 }
 

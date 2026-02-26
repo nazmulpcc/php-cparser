@@ -153,6 +153,10 @@ ZEND_METHOD(CParser_Cursor, getType)
         RETURN_NULL();
 
     CXType t = clang_getCursorType(intern->native);
+    if (t.kind == CXType_Invalid)
+    {
+        RETURN_NULL();
+    }
     object_init_ex(return_value, cparser_type_ce);
     php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
 }
@@ -178,6 +182,10 @@ ZEND_METHOD(CParser_Cursor, getCanonical)
         RETURN_NULL();
 
     CXCursor canonical = clang_getCanonicalCursor(intern->native);
+    if (clang_Cursor_isNull(canonical))
+    {
+        RETURN_NULL();
+    }
     cparser_create_cursor(&canonical, return_value);
 }
 
@@ -190,6 +198,10 @@ ZEND_METHOD(CParser_Cursor, getParent)
         RETURN_NULL();
 
     CXCursor parent = clang_getCursorSemanticParent(intern->native);
+    if (clang_Cursor_isNull(parent))
+    {
+        RETURN_NULL();
+    }
     cparser_create_cursor(&parent, return_value);
 }
 

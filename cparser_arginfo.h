@@ -1,8 +1,9 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f24f0e2f1f6748902d5f8d71ddc4a5fcb296cb96 */
+ * Stub hash: f16301537f9d14b391a362f1ec927007fd9b7eac */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CParser_CursorIterator___construct, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, tu, CParser\\TranslationUnit, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, source, CParser\\TranslationUnit|CParser\\Cursor, 0, NULL)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, filter_kind, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CParser_CursorIterator_current, 0, 0, CParser\\Cursor, 1)
@@ -97,8 +98,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_CParser_FunctionCursor_getNumArguments arginfo_class_CParser_CursorIterator_key
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CParser_FieldCursor_getAccessSpecifier, 0, 0, IS_STRING, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_class_CParser_FieldCursor_getAccessSpecifier arginfo_class_CParser_MethodCursor_getAccessSpecifier
 
 #define arginfo_class_CParser_FieldCursor_isStatic arginfo_class_CParser_CursorIterator_valid
 

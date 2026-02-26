@@ -16,6 +16,18 @@ extern "C"
 
 using cparser_tu = cparser_obj<CXTranslationUnit>;
 
+template <>
+void cparser_object_free<CXTranslationUnit>(zend_object *obj)
+{
+    cparser_tu *intern = php_cparser_fetch<CXTranslationUnit>(obj);
+    if (intern->native)
+    {
+        clang_disposeTranslationUnit(intern->native);
+        intern->native = nullptr;
+    }
+    zend_object_std_dtor(obj);
+}
+
 #define RETURN_CURSOR_IT_WITH_FILTER(kind)                                                                           \
     do                                                                                                               \
     {                                                                                                                \

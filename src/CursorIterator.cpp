@@ -65,14 +65,15 @@ ZEND_METHOD(CParser_CursorIterator, current)
 ZEND_METHOD(CParser_CursorIterator, key)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    RETURN_LONG(0);
+    cparser_iterator *it = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(getThis()));
+    RETURN_LONG(it->native.currentIndex());
 }
 
 ZEND_METHOD(CParser_CursorIterator, next)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     cparser_iterator *it = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(getThis()));
-    it->native.next();
+    it->native.nextWithIndex();
     RETURN_NULL();
 }
 

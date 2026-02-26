@@ -15,6 +15,7 @@ private:
     bool done;
     int filter_kind;
     bool include_root;
+    zend_long index;
 
     bool isValidCursor(const CXCursor &cursor) const
     {
@@ -55,7 +56,7 @@ private:
 
 public:
     NativeCXCursorIterator(CXCursor root, int filter_kind = 0, bool include_root = false)
-        : root(root), filter_kind(filter_kind), done(false), include_root(include_root)
+        : root(root), done(false), filter_kind(filter_kind), include_root(include_root), index(0)
     {
         rewind();
     }
@@ -104,6 +105,11 @@ public:
         return current;
     }
 
+    zend_long currentIndex() const
+    {
+        return index;
+    }
+
     void rewind()
     {
         while (!stack.empty())
@@ -129,11 +135,22 @@ public:
                                     return CXChildVisit_Continue; }, &stack);
         }
         done = false;
+        index = 0;
         // Immediately advance to the first valid matching cursor
         if (!advanceToNextValidCursor())
         {
             done = true;
         }
+    }
+
+    bool nextWithIndex()
+    {
+        if (done)
+        {
+            return false;
+        }
+        ++index;
+        return advanceToNextValidCursor();
     }
 };
 
