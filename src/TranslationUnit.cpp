@@ -104,13 +104,60 @@ ZEND_METHOD(CParser_TranslationUnit, cursors)
 ZEND_METHOD(CParser_TranslationUnit, classes)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    RETURN_CURSOR_IT_WITH_FILTER(CXCursor_ClassDecl);
+    cparser_tu *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(getThis()));
+    if (!intern || !intern->native)
+    {
+        array_init(return_value);
+        return;
+    }
+
+    CXCursor root = clang_getTranslationUnitCursor(intern->native);
+    array_init(return_value);
+
+    clang_visitChildren(
+        root,
+        [](CXCursor c, CXCursor /*parent*/, CXClientData client_data)
+        {
+            zval *retval = static_cast<zval *>(client_data);
+            CXCursorKind k = clang_getCursorKind(c);
+            if (k == CXCursor_ClassDecl || k == CXCursor_StructDecl)
+            {
+                zval zv;
+                cparser_create_cursor(&c, &zv);
+                add_next_index_zval(retval, &zv);
+            }
+            return CXChildVisit_Continue;
+        },
+        return_value);
 }
 
 ZEND_METHOD(CParser_TranslationUnit, enums)
 {
     ZEND_PARSE_PARAMETERS_NONE();
-    RETURN_CURSOR_IT_WITH_FILTER(CXCursor_EnumDecl);
+    cparser_tu *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(getThis()));
+    if (!intern || !intern->native)
+    {
+        array_init(return_value);
+        return;
+    }
+
+    CXCursor root = clang_getTranslationUnitCursor(intern->native);
+    array_init(return_value);
+
+    clang_visitChildren(
+        root,
+        [](CXCursor c, CXCursor /*parent*/, CXClientData client_data)
+        {
+            zval *retval = static_cast<zval *>(client_data);
+            if (clang_getCursorKind(c) == CXCursor_EnumDecl)
+            {
+                zval zv;
+                cparser_create_cursor(&c, &zv);
+                add_next_index_zval(retval, &zv);
+            }
+            return CXChildVisit_Continue;
+        },
+        return_value);
 }
 
 ZEND_METHOD(CParser_TranslationUnit, diagnostics)

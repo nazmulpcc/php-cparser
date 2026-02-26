@@ -64,6 +64,15 @@ void cparser_create_cursor(CXCursor *cursor, zval *return_value)
         it->native = NativeCXCursorIterator(intern->native, kind, false);            \
     } while (0);
 
+#define RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(kind)                                 \
+    do                                                                               \
+    {                                                                                \
+        object_init_ex(return_value, cparser_cursoriterator_ce);                     \
+        auto *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));              \
+        auto *it = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(return_value)); \
+        it->native = NativeCXCursorIterator(intern->native, kind, false, false);     \
+    } while (0);
+
 ZEND_METHOD(CParser_Cursor, getKind)
 {
     ZEND_PARSE_PARAMETERS_NONE();
@@ -214,7 +223,7 @@ ZEND_METHOD(CParser_Cursor, getChildren)
     Z_PARAM_LONG(filter_kind)
     ZEND_PARSE_PARAMETERS_END();
 
-    RETURN_CURSOR_WITH_FILTER(filter_kind);
+    RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(filter_kind);
 }
 
 ZEND_METHOD(CParser_ClassCursor, getBases)

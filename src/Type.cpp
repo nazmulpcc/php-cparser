@@ -92,16 +92,9 @@ ZEND_METHOD(CParser_Type, getTemplateArguments)
     {
         CXType argType = clang_Type_getTemplateArgumentAsType(intern->native, i);
 
-        if (argType.kind != CXType_Invalid)
-        {
-            zval zv;
-            object_init_ex(&zv, cparser_type_ce);
-            php_cparser_fetch<CXType>(Z_OBJ(zv))->native = argType;
-            add_next_index_zval(return_value, &zv);
-        }
-        else
-        {
-            add_next_index_null(return_value);
-        }
+        zval zv;
+        object_init_ex(&zv, cparser_templateargument_ce);
+        php_cparser_fetch<CXType>(Z_OBJ(zv))->native = argType;
+        add_next_index_zval(return_value, &zv);
     }
 }

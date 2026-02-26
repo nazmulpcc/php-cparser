@@ -15,6 +15,7 @@ private:
     bool done;
     int filter_kind;
     bool include_root;
+    bool recursive;
     zend_long index;
 
     bool isValidCursor(const CXCursor &cursor) const
@@ -55,8 +56,8 @@ private:
     }
 
 public:
-    NativeCXCursorIterator(CXCursor root, int filter_kind = 0, bool include_root = false)
-        : root(root), done(false), filter_kind(filter_kind), include_root(include_root), index(0)
+    NativeCXCursorIterator(CXCursor root, int filter_kind = 0, bool include_root = false, bool recursive = true)
+        : root(root), done(false), filter_kind(filter_kind), include_root(include_root), recursive(recursive), index(0)
     {
         rewind();
     }
@@ -73,8 +74,11 @@ public:
                 continue;
             }
 
-            // Always push children first (inclusive traversal)
-            pushChildrenSafe(candidate);
+            if (recursive)
+            {
+                // Recursive traversal: descend into descendants before filtering result set.
+                pushChildrenSafe(candidate);
+            }
 
             if (cursorMatchesFilter(candidate))
             {
