@@ -5,7 +5,7 @@
 namespace CParser;
 
 /**
- * @template T of ClassDecl
+ * @template T of Cursor
  * @implements \Iterator<int, T>
  */
 final class CursorIterator implements \Iterator
@@ -94,7 +94,7 @@ final class TranslationUnit
     /**
      * Lazily yield all top-level enums in the translation unit.
      *
-     * @return iterable<EnumCrursor>
+     * @return iterable<EnumCursor>
      */
     public function enums(): iterable {}
 
@@ -176,6 +176,7 @@ final class FunctionCursor extends Cursor {
 }
 
 final class FieldCursor extends Cursor {
+    public function getType(): ?Type {}
     public function getAccessSpecifier(): ?int {}
     public function isStatic(): bool {}
 }
@@ -191,6 +192,7 @@ final class EnumConstantCursor extends Cursor {
 }
 
 final class ParameterCursor extends Cursor {
+    public function getType(): ?Type {}
     public function isConstQualified(): bool {}
     public function hasDefaultValue(): bool {}
 }

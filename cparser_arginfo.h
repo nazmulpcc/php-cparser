@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a86044491dfe3d12616ee422e6398387c599b0ff */
+ * Stub hash: 6784a3ba217cc0a4e3eaee300bbc8a18b9c2d6ad */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CParser_CursorIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_TYPE_MASK(0, source, CParser\\TranslationUnit|CParser\\Cursor, 0, NULL)
@@ -128,6 +128,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_CParser_FunctionCursor_getNumArguments arginfo_class_CParser_CursorIterator_key
 
+#define arginfo_class_CParser_FieldCursor_getType arginfo_class_CParser_Cursor_getType
+
 #define arginfo_class_CParser_FieldCursor_getAccessSpecifier arginfo_class_CParser_MethodCursor_getAccessSpecifier
 
 #define arginfo_class_CParser_FieldCursor_isStatic arginfo_class_CParser_CursorIterator_valid
@@ -138,6 +140,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_CParser_EnumConstantCursor_getValue, 0, 0, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_CParser_ParameterCursor_getType arginfo_class_CParser_Cursor_getType
 
 #define arginfo_class_CParser_ParameterCursor_isConstQualified arginfo_class_CParser_CursorIterator_valid
 
@@ -235,11 +239,13 @@ ZEND_METHOD(CParser_MethodCursor, getAccessSpecifier);
 ZEND_METHOD(CParser_FunctionCursor, getReturnType);
 ZEND_METHOD(CParser_FunctionCursor, getParameters);
 ZEND_METHOD(CParser_FunctionCursor, getNumArguments);
+ZEND_METHOD(CParser_FieldCursor, getType);
 ZEND_METHOD(CParser_FieldCursor, getAccessSpecifier);
 ZEND_METHOD(CParser_FieldCursor, isStatic);
 ZEND_METHOD(CParser_EnumCursor, getConstants);
 ZEND_METHOD(CParser_EnumCursor, getIntegerType);
 ZEND_METHOD(CParser_EnumConstantCursor, getValue);
+ZEND_METHOD(CParser_ParameterCursor, getType);
 ZEND_METHOD(CParser_ParameterCursor, isConstQualified);
 ZEND_METHOD(CParser_ParameterCursor, hasDefaultValue);
 ZEND_METHOD(CParser_TypeAliasCursor, getUnderlyingType);
@@ -347,6 +353,7 @@ static const zend_function_entry class_CParser_FunctionCursor_methods[] = {
 };
 
 static const zend_function_entry class_CParser_FieldCursor_methods[] = {
+	ZEND_ME(CParser_FieldCursor, getType, arginfo_class_CParser_FieldCursor_getType, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_FieldCursor, getAccessSpecifier, arginfo_class_CParser_FieldCursor_getAccessSpecifier, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_FieldCursor, isStatic, arginfo_class_CParser_FieldCursor_isStatic, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -364,6 +371,7 @@ static const zend_function_entry class_CParser_EnumConstantCursor_methods[] = {
 };
 
 static const zend_function_entry class_CParser_ParameterCursor_methods[] = {
+	ZEND_ME(CParser_ParameterCursor, getType, arginfo_class_CParser_ParameterCursor_getType, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_ParameterCursor, isConstQualified, arginfo_class_CParser_ParameterCursor_isConstQualified, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_ParameterCursor, hasDefaultValue, arginfo_class_CParser_ParameterCursor_hasDefaultValue, ZEND_ACC_PUBLIC)
 	ZEND_FE_END

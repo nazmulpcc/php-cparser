@@ -498,6 +498,10 @@ ZEND_METHOD(CParser_FieldCursor, getType)
     if (!intern)
         RETURN_NULL();
     CXType t = clang_getCursorType(intern->native);
+    if (t.kind == CXType_Invalid)
+    {
+        RETURN_NULL();
+    }
     cparser_type_init_object(return_value, t, &intern->native);
 }
 
@@ -553,6 +557,10 @@ ZEND_METHOD(CParser_ParameterCursor, getType)
     if (!intern)
         RETURN_NULL();
     CXType t = clang_getCursorType(intern->native);
+    if (t.kind == CXType_Invalid)
+    {
+        RETURN_NULL();
+    }
     cparser_type_init_object(return_value, t, &intern->native);
 }
 
