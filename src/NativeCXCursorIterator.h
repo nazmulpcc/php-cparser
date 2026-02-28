@@ -66,10 +66,22 @@ private:
     }
 
 public:
+    zval owner;
+
     NativeCXCursorIterator(CXCursor root, int filter_kind = 0, bool include_root = false, bool recursive = true, int alt_filter_kind = 0)
         : root(root), done(false), filter_kind(filter_kind), alt_filter_kind(alt_filter_kind), include_root(include_root), recursive(recursive), index(0)
     {
+        ZVAL_UNDEF(&owner);
         rewind();
+    }
+
+    void clearOwner()
+    {
+        if (!Z_ISUNDEF(owner))
+        {
+            zval_ptr_dtor(&owner);
+            ZVAL_UNDEF(&owner);
+        }
     }
 
     bool advanceToNextValidCursor()

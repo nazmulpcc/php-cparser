@@ -40,6 +40,8 @@ struct cparser_native_translation_unit
     CXTranslationUnit tu;
 };
 
+class NativeCXCursorIterator;
+
 void cparser_create_cursor(CXCursor *cursor, zval *return_value);
 
 template <typename T>
@@ -77,6 +79,9 @@ void cparser_object_free(zend_object *object)
     cparser_obj<T> *intern = (cparser_obj<T> *)((char *)object - XtOffsetOf(cparser_obj<T>, std));
     zend_object_std_dtor(object);
 }
+
+template <>
+void cparser_object_free<NativeCXCursorIterator>(zend_object *object);
 
 static inline int cparser_compare_cursors(zval *object1, zval *object2)
 {

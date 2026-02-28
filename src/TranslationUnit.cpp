@@ -40,7 +40,9 @@ void cparser_object_free<cparser_native_translation_unit>(zend_object *obj)
         cparser_tu *intern = php_cparser_fetch<cparser_native_translation_unit>(Z_OBJ_P(getThis()));                 \
         object_init_ex(return_value, cparser_cursoriterator_ce);                                                     \
         auto *it_intern = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(return_value));                          \
+        it_intern->native.clearOwner();                                                                               \
         it_intern->native = NativeCXCursorIterator(clang_getTranslationUnitCursor(intern->native.tu), (int)kind, true); \
+        ZVAL_COPY(&it_intern->native.owner, getThis());                                                               \
         return;                                                                                                      \
     } while (0)
 
@@ -117,12 +119,14 @@ ZEND_METHOD(CParser_TranslationUnit, classes)
     cparser_tu *intern = php_cparser_fetch<cparser_native_translation_unit>(Z_OBJ_P(getThis()));
     object_init_ex(return_value, cparser_cursoriterator_ce);
     auto *it_intern = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(return_value));
+    it_intern->native.clearOwner();
     it_intern->native = NativeCXCursorIterator(
         clang_getTranslationUnitCursor(intern->native.tu),
         (int)CXCursor_ClassDecl,
         false,
         false,
         (int)CXCursor_StructDecl);
+    ZVAL_COPY(&it_intern->native.owner, getThis());
 }
 
 ZEND_METHOD(CParser_TranslationUnit, enums)
@@ -131,11 +135,13 @@ ZEND_METHOD(CParser_TranslationUnit, enums)
     cparser_tu *intern = php_cparser_fetch<cparser_native_translation_unit>(Z_OBJ_P(getThis()));
     object_init_ex(return_value, cparser_cursoriterator_ce);
     auto *it_intern = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(return_value));
+    it_intern->native.clearOwner();
     it_intern->native = NativeCXCursorIterator(
         clang_getTranslationUnitCursor(intern->native.tu),
         (int)CXCursor_EnumDecl,
         false,
         false);
+    ZVAL_COPY(&it_intern->native.owner, getThis());
 }
 
 ZEND_METHOD(CParser_TranslationUnit, diagnostics)

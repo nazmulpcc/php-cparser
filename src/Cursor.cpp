@@ -61,7 +61,9 @@ void cparser_create_cursor(CXCursor *cursor, zval *return_value)
         object_init_ex(return_value, cparser_cursoriterator_ce);                     \
         auto *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));              \
         auto *it = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(return_value)); \
+        it->native.clearOwner();                                                      \
         it->native = NativeCXCursorIterator(intern->native, kind, false);            \
+        ZVAL_COPY(&it->native.owner, getThis());                                      \
     } while (0);
 
 #define RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(kind)                                 \
@@ -70,7 +72,9 @@ void cparser_create_cursor(CXCursor *cursor, zval *return_value)
         object_init_ex(return_value, cparser_cursoriterator_ce);                     \
         auto *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));              \
         auto *it = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(return_value)); \
+        it->native.clearOwner();                                                      \
         it->native = NativeCXCursorIterator(intern->native, kind, false, false);     \
+        ZVAL_COPY(&it->native.owner, getThis());                                      \
     } while (0);
 
 ZEND_METHOD(CParser_Cursor, getKind)

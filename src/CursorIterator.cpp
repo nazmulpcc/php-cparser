@@ -11,6 +11,14 @@ extern "C"
 using cparser_tu = cparser_obj<cparser_native_translation_unit>;
 using cparser_iterator = cparser_obj<NativeCXCursorIterator>;
 
+template <>
+void cparser_object_free<NativeCXCursorIterator>(zend_object *obj)
+{
+    cparser_iterator *intern = php_cparser_fetch<NativeCXCursorIterator>(obj);
+    intern->native.clearOwner();
+    zend_object_std_dtor(obj);
+}
+
 ZEND_METHOD(CParser_CursorIterator, __construct)
 {
     zval *source;
@@ -22,6 +30,7 @@ ZEND_METHOD(CParser_CursorIterator, __construct)
     ZEND_PARSE_PARAMETERS_END();
 
     cparser_iterator *it = php_cparser_fetch<NativeCXCursorIterator>(Z_OBJ_P(getThis()));
+    it->native.clearOwner();
 
     CXCursor root;
     if (instanceof_function(Z_OBJCE_P(source), cparser_translationunit_ce))
@@ -46,6 +55,7 @@ ZEND_METHOD(CParser_CursorIterator, __construct)
 
     // Initialize native iterator directly
     it->native = NativeCXCursorIterator(root, (int)filter_kind, false);
+    ZVAL_COPY(&it->native.owner, source);
 }
 
 ZEND_METHOD(CParser_CursorIterator, current)
