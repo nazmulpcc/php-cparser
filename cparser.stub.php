@@ -140,15 +140,15 @@ class Cursor {
 }
 
 final class ClassCursor extends Cursor {
-    /** Recursively yields matching descendants. @return iterable<ClassCursor> */
+    /** @return iterable<ClassCursor> */
     public function getBases(): iterable {}
-    /** Recursively yields matching descendants. @return iterable<MethodCursor> */
+    /** @return iterable<MethodCursor> */
     public function getMethods(): iterable {}
-    /** Recursively yields matching descendants. @return iterable<FieldCursor> */
+    /** @return iterable<FieldCursor> */
     public function getFields(): iterable {}
-    /** Recursively yields matching descendants. @return iterable<ClassCursor> */
+    /** @return iterable<ClassCursor> */
     public function getInnerClasses(): iterable {}
-    /** Recursively yields matching descendants. @return iterable<EnumCursor> */
+    /** @return iterable<EnumCursor> */
     public function getEnums(): iterable {}
     public function isAbstract(): bool {}
     public function isStruct(): bool {}

@@ -230,35 +230,35 @@ ZEND_METHOD(CParser_ClassCursor, getBases)
 {
     ZEND_PARSE_PARAMETERS_NONE();
 
-    RETURN_CURSOR_WITH_FILTER(CXCursor_CXXBaseSpecifier);
+    RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(CXCursor_CXXBaseSpecifier);
 }
 
 ZEND_METHOD(CParser_ClassCursor, getMethods)
 {
     ZEND_PARSE_PARAMETERS_NONE();
 
-    RETURN_CURSOR_WITH_FILTER(CXCursor_CXXMethod);
+    RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(CXCursor_CXXMethod);
 }
 
 ZEND_METHOD(CParser_ClassCursor, getFields)
 {
     ZEND_PARSE_PARAMETERS_NONE();
 
-    RETURN_CURSOR_WITH_FILTER(CXCursor_FieldDecl);
+    RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(CXCursor_FieldDecl);
 }
 
 ZEND_METHOD(CParser_ClassCursor, getInnerClasses)
 {
     ZEND_PARSE_PARAMETERS_NONE();
 
-    RETURN_CURSOR_WITH_FILTER(CXCursor_ClassDecl);
+    RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(CXCursor_ClassDecl);
 }
 
 ZEND_METHOD(CParser_ClassCursor, getEnums)
 {
     ZEND_PARSE_PARAMETERS_NONE();
 
-    RETURN_CURSOR_WITH_FILTER(CXCursor_EnumDecl);
+    RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(CXCursor_EnumDecl);
 }
 
 ZEND_METHOD(CParser_ClassCursor, isAbstract)
