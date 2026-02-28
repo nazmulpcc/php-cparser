@@ -9,6 +9,44 @@ extern "C"
 
 using cparser_cursor = cparser_obj<CXCursor>;
 
+struct BaseClassCollectData
+{
+    zval *retval;
+};
+
+static CXCursor cparser_resolve_base_class_cursor(CXCursor base_specifier)
+{
+    CXType base_type = clang_getCursorType(base_specifier);
+    if (base_type.kind == CXType_Invalid)
+    {
+        return clang_getNullCursor();
+    }
+
+    // Prefer canonical type so aliases/typedefs resolve to the record declaration.
+    CXCursor base_decl = clang_getTypeDeclaration(clang_getCanonicalType(base_type));
+    if (clang_Cursor_isNull(base_decl))
+    {
+        base_decl = clang_getTypeDeclaration(base_type);
+    }
+    if (clang_Cursor_isNull(base_decl))
+    {
+        base_decl = clang_getCursorReferenced(base_specifier);
+    }
+
+    if (clang_Cursor_isNull(base_decl))
+    {
+        return base_decl;
+    }
+
+    CXCursorKind kind = clang_getCursorKind(base_decl);
+    if (kind != CXCursor_ClassDecl && kind != CXCursor_StructDecl)
+    {
+        return clang_getNullCursor();
+    }
+
+    return base_decl;
+}
+
 // get specific cursor object given a CXCursor
 void cparser_create_cursor(CXCursor *cursor, zval *return_value)
 {
@@ -234,7 +272,35 @@ ZEND_METHOD(CParser_ClassCursor, getBases)
 {
     ZEND_PARSE_PARAMETERS_NONE();
 
-    RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(CXCursor_CXXBaseSpecifier);
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+
+    array_init(return_value);
+
+    BaseClassCollectData data = {return_value};
+    clang_visitChildren(
+        intern->native,
+        [](CXCursor c, CXCursor /*parent*/, CXClientData client_data)
+        {
+            if (clang_getCursorKind(c) != CXCursor_CXXBaseSpecifier)
+            {
+                return CXChildVisit_Continue;
+            }
+
+            CXCursor base_decl = cparser_resolve_base_class_cursor(c);
+            if (clang_Cursor_isNull(base_decl))
+            {
+                return CXChildVisit_Continue;
+            }
+
+            zval zcursor;
+            cparser_create_cursor(&base_decl, &zcursor);
+            add_next_index_zval(static_cast<BaseClassCollectData *>(client_data)->retval, &zcursor);
+
+            return CXChildVisit_Continue;
+        },
+        &data);
 }
 
 ZEND_METHOD(CParser_ClassCursor, getMethods)
