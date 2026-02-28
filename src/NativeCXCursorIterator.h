@@ -28,23 +28,29 @@ private:
 
     void pushChildrenSafe(CXCursor parent)
     {
+        std::vector<CXCursor> children;
         clang_visitChildren(
             parent,
             [](CXCursor c, CXCursor /*parent*/, CXClientData client_data)
             {
-                std::stack<CXCursor> *stack_ptr = static_cast<std::stack<CXCursor> *>(client_data);
+                std::vector<CXCursor> *children_ptr = static_cast<std::vector<CXCursor> *>(client_data);
                 if (!clang_Cursor_isNull(c))
                 {
                     CXCursorKind kind = clang_getCursorKind(c);
                     if (kind != CXCursor_InvalidFile &&
                         kind != CXCursor_NoDeclFound)
                     {
-                        stack_ptr->push(c);
+                        children_ptr->push_back(c);
                     }
                 }
                 return CXChildVisit_Continue;
             },
-            &stack);
+            &children);
+
+        for (auto it = children.rbegin(); it != children.rend(); ++it)
+        {
+            stack.push(*it);
+        }
     }
 
     bool cursorMatchesFilter(CXCursor cursor) const
@@ -151,14 +157,7 @@ public:
         }
         else
         {
-            clang_visitChildren(root, [](CXCursor c, CXCursor parent, CXClientData client_data)
-                                {
-                                    std::stack<CXCursor> *stack_ptr = static_cast<std::stack<CXCursor> *>(client_data);
-                                    if (!clang_Cursor_isNull(c))
-                                    {
-                                        stack_ptr->push(c);
-                                    }
-                                    return CXChildVisit_Continue; }, &stack);
+            pushChildrenSafe(root);
         }
         done = false;
         index = 0;

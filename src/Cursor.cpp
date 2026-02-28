@@ -298,7 +298,7 @@ ZEND_METHOD(CParser_MethodCursor, getParameters)
 {
     ZEND_PARSE_PARAMETERS_NONE();
 
-    RETURN_CURSOR_WITH_FILTER(CXCursor_ParmDecl);
+    RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(CXCursor_ParmDecl);
 }
 
 ZEND_METHOD(CParser_MethodCursor, getBaseMethods)
@@ -398,7 +398,7 @@ ZEND_METHOD(CParser_FunctionCursor, getParameters)
 {
     ZEND_PARSE_PARAMETERS_NONE();
 
-    RETURN_CURSOR_WITH_FILTER(CXCursor_ParmDecl);
+    RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(CXCursor_ParmDecl);
 }
 
 ZEND_METHOD(CParser_FunctionCursor, getNumArguments)
