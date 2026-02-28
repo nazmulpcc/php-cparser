@@ -75,16 +75,18 @@ void register_cursorkind_constants(zend_class_entry *ce, int start, int end)
 {
 	for (int i = start; i <= end; i++)
 	{
-		const char *name = clang_getCString(clang_getCursorKindSpelling((enum CXCursorKind)i));
+		CXString spelling = clang_getCursorKindSpelling((enum CXCursorKind)i);
+		const char *name = clang_getCString(spelling);
 		if (name && name[0] != '\0')
 		{
 			// check if constant already defined to avoid redefinition warnings
-			if (zend_hash_str_exists(&ce->constants_table, name, strlen(name)))
+			size_t len = strlen(name);
+			if (!zend_hash_str_exists(&ce->constants_table, name, len))
 			{
-				continue;
+				zend_declare_class_constant_long(ce, name, len, i);
 			}
-			zend_declare_class_constant_long(ce, name, strlen(name), i);
 		}
+		clang_disposeString(spelling);
 	}
 }
 
@@ -145,6 +147,12 @@ PHP_MINIT_FUNCTION(cparser)
 	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstRef, CXCursor_LastRef);
 	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstInvalid, CXCursor_LastInvalid);
 	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstExpr, CXCursor_LastExpr);
+	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstStmt, CXCursor_LastStmt);
+	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_TranslationUnit, CXCursor_TranslationUnit);
+	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstAttr, CXCursor_LastAttr);
+	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstPreprocessing, CXCursor_LastPreprocessing);
+	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstExtraDecl, CXCursor_LastExtraDecl);
+	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_OverloadCandidate, CXCursor_OverloadCandidate);
 
 	register_class_CParser_Access();
 
