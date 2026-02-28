@@ -8,7 +8,7 @@ extern "C"
 #include "php_cparser.h"
 #include "NativeCXCursorIterator.h"
 
-using cparser_tu = cparser_obj<CXTranslationUnit>;
+using cparser_tu = cparser_obj<cparser_native_translation_unit>;
 using cparser_iterator = cparser_obj<NativeCXCursorIterator>;
 
 ZEND_METHOD(CParser_CursorIterator, __construct)
@@ -26,12 +26,12 @@ ZEND_METHOD(CParser_CursorIterator, __construct)
     CXCursor root;
     if (instanceof_function(Z_OBJCE_P(source), cparser_translationunit_ce))
     {
-        cparser_tu *tu_intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(source));
-        if (!tu_intern || !tu_intern->native)
+        cparser_tu *tu_intern = php_cparser_fetch<cparser_native_translation_unit>(Z_OBJ_P(source));
+        if (!tu_intern || !tu_intern->native.tu)
         {
             RETURN_NULL();
         }
-        root = clang_getTranslationUnitCursor(tu_intern->native);
+        root = clang_getTranslationUnitCursor(tu_intern->native.tu);
     }
     else if (instanceof_function(Z_OBJCE_P(source), cparser_cursor_ce))
     {

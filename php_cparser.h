@@ -34,6 +34,12 @@ extern zend_class_entry *cparser_templateargumentiterator_ce;
 #include <clang-c/Index.h>
 #include <stack>
 
+struct cparser_native_translation_unit
+{
+    CXIndex index;
+    CXTranslationUnit tu;
+};
+
 void cparser_create_cursor(CXCursor *cursor, zval *return_value);
 
 template <typename T>

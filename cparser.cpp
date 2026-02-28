@@ -92,7 +92,7 @@ PHP_MINIT_FUNCTION(cparser)
 {
 	register_class_CParser_TranslationUnitFlags();
 	cparser_translationunit_ce = register_class_CParser_TranslationUnit();
-	register_cparser_ce_handlers<CXTranslationUnit>(cparser_translationunit_ce);
+	register_cparser_ce_handlers<cparser_native_translation_unit>(cparser_translationunit_ce);
 
 	cparser_cursor_ce = register_class_CParser_Cursor();
 	register_cparser_ce_handlers<CXCursor>(cparser_cursor_ce);

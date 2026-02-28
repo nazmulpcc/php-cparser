@@ -7,7 +7,7 @@ extern "C"
 #include "php_cparser.h"
 #include "NativeIterators.h"
 
-using cparser_tu = cparser_obj<CXTranslationUnit>;
+using cparser_tu = cparser_obj<cparser_native_translation_unit>;
 using cparser_diag_it = cparser_obj<NativeDiagnosticIterator>;
 
 template <>
@@ -29,11 +29,11 @@ ZEND_METHOD(CParser_DiagnosticIterator, __construct)
     Z_PARAM_OBJECT_OF_CLASS(tu_zv, cparser_translationunit_ce)
     ZEND_PARSE_PARAMETERS_END();
 
-    cparser_tu *tu = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(tu_zv));
+    cparser_tu *tu = php_cparser_fetch<cparser_native_translation_unit>(Z_OBJ_P(tu_zv));
     cparser_diag_it *it = php_cparser_fetch<NativeDiagnosticIterator>(Z_OBJ_P(getThis()));
 
-    it->native.tu = tu->native;
-    it->native.count = tu->native ? clang_getNumDiagnostics(tu->native) : 0;
+    it->native.tu = tu->native.tu;
+    it->native.count = tu->native.tu ? clang_getNumDiagnostics(tu->native.tu) : 0;
     it->native.index = 0;
     ZVAL_COPY(&it->native.owner, tu_zv);
 }
