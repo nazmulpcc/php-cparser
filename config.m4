@@ -40,7 +40,9 @@ AS_VAR_IF([PHP_CPARSER], [no],, [
     src/TemplateParameter.cpp \
     src/TemplateArgument.cpp \
     src/Diagnostic.cpp \
-    src/CursorIterator.cpp"
+    src/CursorIterator.cpp \
+    src/DiagnosticIterator.cpp \
+    src/TemplateArgumentIterator.cpp"
   
   PHP_NEW_EXTENSION([cparser],
     $cparser_source_files,

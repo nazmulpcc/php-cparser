@@ -9,6 +9,7 @@ extern "C"
 
 #ifdef __cplusplus
 #include "NativeCXCursorIterator.h"
+#include "NativeIterators.h"
 #include <clang-c/Index.h>
 #include <string>
 #include <vector>
@@ -133,31 +134,10 @@ ZEND_METHOD(CParser_TranslationUnit, diagnostics)
     ZEND_PARSE_PARAMETERS_NONE();
     cparser_tu *intern = php_cparser_fetch<CXTranslationUnit>(Z_OBJ_P(getThis()));
 
-    if (!intern->native)
-    {
-        array_init(return_value);
-        return;
-    }
-
-    unsigned count = clang_getNumDiagnostics(intern->native);
-    array_init_size(return_value, count);
-
-    for (unsigned i = 0; i < count; i++)
-    {
-        CXDiagnostic diag = clang_getDiagnostic(intern->native, i);
-
-        if (!diag)
-        {
-            add_next_index_null(return_value);
-            continue;
-        }
-
-        zval zv;
-        object_init_ex(&zv, cparser_diagnostic_ce);
-
-        auto *diag_intern = php_cparser_fetch<CXDiagnostic>(Z_OBJ(zv));
-        diag_intern->native = diag;
-
-        add_next_index_zval(return_value, &zv);
-    }
+    object_init_ex(return_value, cparser_diagnosticiterator_ce);
+    auto *it = php_cparser_fetch<NativeDiagnosticIterator>(Z_OBJ_P(return_value));
+    it->native.tu = intern->native;
+    it->native.count = intern->native ? clang_getNumDiagnostics(intern->native) : 0;
+    it->native.index = 0;
+    ZVAL_COPY(&it->native.owner, getThis());
 }

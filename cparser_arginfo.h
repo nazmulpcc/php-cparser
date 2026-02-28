@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7efe082d5b4ae81fd00bc1e96c2bea1667be4e99 */
+ * Stub hash: a9f7c348ff3cf6f3ed40f61a24bc86be61510cbc */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CParser_CursorIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_TYPE_MASK(0, source, CParser\\TranslationUnit|CParser\\Cursor, 0, NULL)
@@ -19,6 +19,36 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CParser_CursorIterator_valid, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CParser_DiagnosticIterator___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, tu, CParser\\TranslationUnit, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CParser_DiagnosticIterator_current, 0, 0, CParser\\Diagnostic, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CParser_DiagnosticIterator_key arginfo_class_CParser_CursorIterator_key
+
+#define arginfo_class_CParser_DiagnosticIterator_next arginfo_class_CParser_CursorIterator_next
+
+#define arginfo_class_CParser_DiagnosticIterator_rewind arginfo_class_CParser_CursorIterator_next
+
+#define arginfo_class_CParser_DiagnosticIterator_valid arginfo_class_CParser_CursorIterator_valid
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CParser_TemplateArgumentIterator___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, type, CParser\\Type, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CParser_TemplateArgumentIterator_current, 0, 0, CParser\\TemplateArgument, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CParser_TemplateArgumentIterator_key arginfo_class_CParser_CursorIterator_key
+
+#define arginfo_class_CParser_TemplateArgumentIterator_next arginfo_class_CParser_CursorIterator_next
+
+#define arginfo_class_CParser_TemplateArgumentIterator_rewind arginfo_class_CParser_CursorIterator_next
+
+#define arginfo_class_CParser_TemplateArgumentIterator_valid arginfo_class_CParser_CursorIterator_valid
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CParser_TranslationUnit_fromFile, 0, 1, CParser\\TranslationUnit, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -160,6 +190,18 @@ ZEND_METHOD(CParser_CursorIterator, key);
 ZEND_METHOD(CParser_CursorIterator, next);
 ZEND_METHOD(CParser_CursorIterator, rewind);
 ZEND_METHOD(CParser_CursorIterator, valid);
+ZEND_METHOD(CParser_DiagnosticIterator, __construct);
+ZEND_METHOD(CParser_DiagnosticIterator, current);
+ZEND_METHOD(CParser_DiagnosticIterator, key);
+ZEND_METHOD(CParser_DiagnosticIterator, next);
+ZEND_METHOD(CParser_DiagnosticIterator, rewind);
+ZEND_METHOD(CParser_DiagnosticIterator, valid);
+ZEND_METHOD(CParser_TemplateArgumentIterator, __construct);
+ZEND_METHOD(CParser_TemplateArgumentIterator, current);
+ZEND_METHOD(CParser_TemplateArgumentIterator, key);
+ZEND_METHOD(CParser_TemplateArgumentIterator, next);
+ZEND_METHOD(CParser_TemplateArgumentIterator, rewind);
+ZEND_METHOD(CParser_TemplateArgumentIterator, valid);
 ZEND_METHOD(CParser_TranslationUnit, fromFile);
 ZEND_METHOD(CParser_TranslationUnit, cursors);
 ZEND_METHOD(CParser_TranslationUnit, classes);
@@ -228,6 +270,26 @@ static const zend_function_entry class_CParser_CursorIterator_methods[] = {
 	ZEND_ME(CParser_CursorIterator, next, arginfo_class_CParser_CursorIterator_next, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_CursorIterator, rewind, arginfo_class_CParser_CursorIterator_rewind, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_CursorIterator, valid, arginfo_class_CParser_CursorIterator_valid, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_CParser_DiagnosticIterator_methods[] = {
+	ZEND_ME(CParser_DiagnosticIterator, __construct, arginfo_class_CParser_DiagnosticIterator___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_DiagnosticIterator, current, arginfo_class_CParser_DiagnosticIterator_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_DiagnosticIterator, key, arginfo_class_CParser_DiagnosticIterator_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_DiagnosticIterator, next, arginfo_class_CParser_DiagnosticIterator_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_DiagnosticIterator, rewind, arginfo_class_CParser_DiagnosticIterator_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_DiagnosticIterator, valid, arginfo_class_CParser_DiagnosticIterator_valid, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_CParser_TemplateArgumentIterator_methods[] = {
+	ZEND_ME(CParser_TemplateArgumentIterator, __construct, arginfo_class_CParser_TemplateArgumentIterator___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_TemplateArgumentIterator, current, arginfo_class_CParser_TemplateArgumentIterator_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_TemplateArgumentIterator, key, arginfo_class_CParser_TemplateArgumentIterator_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_TemplateArgumentIterator, next, arginfo_class_CParser_TemplateArgumentIterator_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_TemplateArgumentIterator, rewind, arginfo_class_CParser_TemplateArgumentIterator_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_TemplateArgumentIterator, valid, arginfo_class_CParser_TemplateArgumentIterator_valid, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -356,6 +418,28 @@ static zend_class_entry *register_class_CParser_CursorIterator(zend_class_entry 
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "CParser", "CursorIterator", class_CParser_CursorIterator_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+	zend_class_implements(class_entry, 1, class_entry_Iterator);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_CParser_DiagnosticIterator(zend_class_entry *class_entry_Iterator)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "CParser", "DiagnosticIterator", class_CParser_DiagnosticIterator_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+	zend_class_implements(class_entry, 1, class_entry_Iterator);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_CParser_TemplateArgumentIterator(zend_class_entry *class_entry_Iterator)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "CParser", "TemplateArgumentIterator", class_CParser_TemplateArgumentIterator_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
 

@@ -26,6 +26,8 @@ extern zend_class_entry *cparser_templateargument_ce;
 extern zend_class_entry *cparser_enumdecl_ce;
 extern zend_class_entry *cparser_diagnostic_ce;
 extern zend_class_entry *cparser_cursoriterator_ce;
+extern zend_class_entry *cparser_diagnosticiterator_ce;
+extern zend_class_entry *cparser_templateargumentiterator_ce;
 
 #ifdef __cplusplus
 

@@ -18,6 +18,32 @@ final class CursorIterator implements \Iterator
     public function valid(): bool {}
 }
 
+/**
+ * @implements \Iterator<int, Diagnostic>
+ */
+final class DiagnosticIterator implements \Iterator
+{
+    public function __construct(TranslationUnit $tu) {}
+    public function current(): Diagnostic|null {}
+    public function key(): int {}
+    public function next(): void {}
+    public function rewind(): void {}
+    public function valid(): bool {}
+}
+
+/**
+ * @implements \Iterator<int, TemplateArgument>
+ */
+final class TemplateArgumentIterator implements \Iterator
+{
+    public function __construct(Type $type) {}
+    public function current(): TemplateArgument|null {}
+    public function key(): int {}
+    public function next(): void {}
+    public function rewind(): void {}
+    public function valid(): bool {}
+}
+
 final class TranslationUnitFlags {
     public const int None = 0x0;
     public const int DetailedPreprocessingRecord = 0x01;

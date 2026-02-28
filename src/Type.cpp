@@ -4,6 +4,7 @@ extern "C"
 #include "zend_exceptions.h"
 }
 #include "php_cparser.h"
+#include "NativeIterators.h"
 
 using type_obj = cparser_obj<CXType>;
 
@@ -79,22 +80,14 @@ ZEND_METHOD(CParser_Type, getTemplateArguments)
     ZEND_PARSE_PARAMETERS_NONE();
     type_obj *intern = php_cparser_fetch<CXType>(Z_OBJ_P(getThis()));
 
-    int num = clang_Type_getNumTemplateArguments(intern->native);
-    if (num <= 0)
+    object_init_ex(return_value, cparser_templateargumentiterator_ce);
+    auto *it = php_cparser_fetch<NativeTemplateArgumentIterator>(Z_OBJ_P(return_value));
+    it->native.source = intern->native;
+    it->native.count = clang_Type_getNumTemplateArguments(intern->native);
+    if (it->native.count < 0)
     {
-        array_init(return_value);
-        return;
+        it->native.count = 0;
     }
-
-    array_init_size(return_value, num);
-
-    for (int i = 0; i < num; i++)
-    {
-        CXType argType = clang_Type_getTemplateArgumentAsType(intern->native, i);
-
-        zval zv;
-        object_init_ex(&zv, cparser_templateargument_ce);
-        php_cparser_fetch<CXType>(Z_OBJ(zv))->native = argType;
-        add_next_index_zval(return_value, &zv);
-    }
+    it->native.index = 0;
+    ZVAL_COPY(&it->native.owner, getThis());
 }

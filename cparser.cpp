@@ -10,6 +10,7 @@
 #include "cparser_arginfo.h"
 #include "zend_interfaces.h"
 #include "src/NativeCXCursorIterator.h"
+#include "src/NativeIterators.h"
 
 /* For compatibility with older PHP versions */
 #ifndef ZEND_PARSE_PARAMETERS_NONE
@@ -37,6 +38,8 @@ zend_class_entry *cparser_templateparameter_ce = nullptr;
 zend_class_entry *cparser_templateargument_ce = nullptr;
 zend_class_entry *cparser_diagnostic_ce = nullptr;
 zend_class_entry *cparser_cursoriterator_ce = nullptr;
+zend_class_entry *cparser_diagnosticiterator_ce = nullptr;
+zend_class_entry *cparser_templateargumentiterator_ce = nullptr;
 zend_class_entry *cparser_cursorkind_ce = nullptr;
 
 static zend_object_handlers cparser_classiterator_object_handlers;
@@ -130,6 +133,12 @@ PHP_MINIT_FUNCTION(cparser)
 	// CursorIterator
 	cparser_cursoriterator_ce = register_class_CParser_CursorIterator(zend_ce_iterator);
 	register_cparser_ce_handlers<NativeCXCursorIterator>(cparser_cursoriterator_ce);
+
+	cparser_diagnosticiterator_ce = register_class_CParser_DiagnosticIterator(zend_ce_iterator);
+	register_cparser_ce_handlers<NativeDiagnosticIterator>(cparser_diagnosticiterator_ce);
+
+	cparser_templateargumentiterator_ce = register_class_CParser_TemplateArgumentIterator(zend_ce_iterator);
+	register_cparser_ce_handlers<NativeTemplateArgumentIterator>(cparser_templateargumentiterator_ce);
 
 	cparser_cursorkind_ce = register_class_CParser_CursorKind();
 	register_cursorkind_constants(cparser_cursorkind_ce, CXCursor_FirstDecl, CXCursor_LastDecl);

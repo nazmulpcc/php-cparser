@@ -1,5 +1,5 @@
 --TEST--
-CParser Type::getTemplateArguments returns TemplateArgument objects (not Type)
+CParser Type::getTemplateArguments returns lazy Traversable of TemplateArgument objects
 --SKIPIF--
 <?php
 if (!extension_loaded('cparser')) {
@@ -33,14 +33,16 @@ if (!$var) {
 }
 
 $args = $var->getType()->getTemplateArguments();
+var_dump($args instanceof Traversable);
 var_dump(is_array($args));
-var_dump(count($args) === 1);
-var_dump($args[0] instanceof CParser\TemplateArgument);
+$list = iterator_to_array($args, false);
+var_dump(count($list) === 1);
+var_dump($list[0] instanceof CParser\TemplateArgument);
 
 @unlink($file);
 ?>
 --EXPECT--
 bool(true)
+bool(false)
 bool(true)
 bool(true)
-
