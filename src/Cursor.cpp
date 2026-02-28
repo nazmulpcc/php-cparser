@@ -9,6 +9,23 @@ extern "C"
 
 using cparser_cursor = cparser_obj<CXCursor>;
 
+static inline void cparser_type_init_object(zval *zv, CXType type, const CXCursor *origin_cursor = nullptr)
+{
+    object_init_ex(zv, cparser_type_ce);
+    auto *type_intern = php_cparser_fetch<cparser_native_type>(Z_OBJ_P(zv));
+    type_intern->native.type = type;
+    if (origin_cursor && !clang_Cursor_isNull(*origin_cursor))
+    {
+        type_intern->native.origin_cursor = *origin_cursor;
+        type_intern->native.has_origin_cursor = 1;
+    }
+    else
+    {
+        type_intern->native.origin_cursor = clang_getNullCursor();
+        type_intern->native.has_origin_cursor = 0;
+    }
+}
+
 struct BaseClassCollectData
 {
     zval *retval;
@@ -208,8 +225,7 @@ ZEND_METHOD(CParser_Cursor, getType)
     {
         RETURN_NULL();
     }
-    object_init_ex(return_value, cparser_type_ce);
-    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
+    cparser_type_init_object(return_value, t, &intern->native);
 }
 
 ZEND_METHOD(CParser_Cursor, isDefinition)
@@ -356,8 +372,7 @@ ZEND_METHOD(CParser_MethodCursor, getReturnType)
     if (!intern)
         RETURN_NULL();
     CXType t = clang_getCursorResultType(intern->native);
-    object_init_ex(return_value, cparser_type_ce);
-    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
+    cparser_type_init_object(return_value, t, &intern->native);
 }
 
 ZEND_METHOD(CParser_MethodCursor, getParameters)
@@ -456,8 +471,7 @@ ZEND_METHOD(CParser_FunctionCursor, getReturnType)
     if (!intern)
         RETURN_NULL();
     CXType t = clang_getCursorResultType(intern->native);
-    object_init_ex(return_value, cparser_type_ce);
-    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
+    cparser_type_init_object(return_value, t, &intern->native);
 }
 
 ZEND_METHOD(CParser_FunctionCursor, getParameters)
@@ -484,8 +498,7 @@ ZEND_METHOD(CParser_FieldCursor, getType)
     if (!intern)
         RETURN_NULL();
     CXType t = clang_getCursorType(intern->native);
-    object_init_ex(return_value, cparser_type_ce);
-    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
+    cparser_type_init_object(return_value, t, &intern->native);
 }
 
 ZEND_METHOD(CParser_FieldCursor, getAccessSpecifier)
@@ -520,8 +533,7 @@ ZEND_METHOD(CParser_EnumCursor, getIntegerType)
     if (!intern)
         RETURN_NULL();
     CXType t = clang_getEnumDeclIntegerType(intern->native);
-    object_init_ex(return_value, cparser_type_ce);
-    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
+    cparser_type_init_object(return_value, t, &intern->native);
 }
 
 ZEND_METHOD(CParser_EnumConstantCursor, getValue)
@@ -541,8 +553,7 @@ ZEND_METHOD(CParser_ParameterCursor, getType)
     if (!intern)
         RETURN_NULL();
     CXType t = clang_getCursorType(intern->native);
-    object_init_ex(return_value, cparser_type_ce);
-    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
+    cparser_type_init_object(return_value, t, &intern->native);
 }
 
 ZEND_METHOD(CParser_ParameterCursor, isConstQualified)
@@ -625,6 +636,5 @@ ZEND_METHOD(CParser_TypeAliasCursor, getUnderlyingType)
     if (!intern)
         RETURN_NULL();
     CXType t = clang_getTypedefDeclUnderlyingType(intern->native);
-    object_init_ex(return_value, cparser_type_ce);
-    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = t;
+    cparser_type_init_object(return_value, t, &intern->native);
 }

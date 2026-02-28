@@ -40,6 +40,71 @@ struct cparser_native_translation_unit
     CXTranslationUnit tu;
 };
 
+struct cparser_native_type
+{
+    CXType type;
+    CXCursor origin_cursor;
+    zend_bool has_origin_cursor;
+};
+
+struct cparser_native_template_argument
+{
+    CXCursor source_cursor;
+    CXType source_type;
+    unsigned index;
+    zend_bool use_cursor;
+};
+
+static inline bool cparser_try_template_argument_cursor(CXCursor cursor, int *count_out)
+{
+    if (clang_Cursor_isNull(cursor))
+    {
+        return false;
+    }
+    int count = clang_Cursor_getNumTemplateArguments(cursor);
+    if (count < 0)
+    {
+        return false;
+    }
+    *count_out = count;
+    return true;
+}
+
+static inline bool cparser_resolve_template_argument_cursor(const cparser_native_type *type_native, CXCursor *cursor_out, int *count_out)
+{
+    if (type_native->has_origin_cursor)
+    {
+        if (cparser_try_template_argument_cursor(type_native->origin_cursor, count_out))
+        {
+            *cursor_out = type_native->origin_cursor;
+            return true;
+        }
+
+        CXCursor canonical_origin = clang_getCanonicalCursor(type_native->origin_cursor);
+        if (cparser_try_template_argument_cursor(canonical_origin, count_out))
+        {
+            *cursor_out = canonical_origin;
+            return true;
+        }
+    }
+
+    CXCursor decl = clang_getTypeDeclaration(type_native->type);
+    if (cparser_try_template_argument_cursor(decl, count_out))
+    {
+        *cursor_out = decl;
+        return true;
+    }
+
+    CXCursor canonical_decl = clang_getTypeDeclaration(clang_getCanonicalType(type_native->type));
+    if (cparser_try_template_argument_cursor(canonical_decl, count_out))
+    {
+        *cursor_out = canonical_decl;
+        return true;
+    }
+
+    return false;
+}
+
 class NativeCXCursorIterator;
 
 void cparser_create_cursor(CXCursor *cursor, zval *return_value);

@@ -14,7 +14,9 @@ struct NativeDiagnosticIterator
 
 struct NativeTemplateArgumentIterator
 {
-    CXType source;
+    CXType source_type;
+    CXCursor source_cursor;
+    zend_bool use_cursor;
     int count;
     int index;
     zval owner;

@@ -116,7 +116,7 @@ PHP_MINIT_FUNCTION(cparser)
 	register_cparser_ce_handlers<CXCursor>(cparser_typealiascursor_ce);
 
 	cparser_type_ce = register_class_CParser_Type();
-	register_cparser_ce_handlers<CXType>(cparser_type_ce);
+	register_cparser_ce_handlers<cparser_native_type>(cparser_type_ce);
 
 	cparser_templatedecl_ce = register_class_CParser_TemplateDecl();
 	register_cparser_ce_handlers<CXCursor>(cparser_templatedecl_ce);
@@ -125,7 +125,7 @@ PHP_MINIT_FUNCTION(cparser)
 	register_cparser_ce_handlers<CXCursor>(cparser_templateparameter_ce);
 
 	cparser_templateargument_ce = register_class_CParser_TemplateArgument();
-	register_cparser_ce_handlers<CXType>(cparser_templateargument_ce);
+	register_cparser_ce_handlers<cparser_native_template_argument>(cparser_templateargument_ce);
 
 	cparser_diagnostic_ce = register_class_CParser_Diagnostic();
 	register_cparser_ce_handlers<CXDiagnostic>(cparser_diagnostic_ce);

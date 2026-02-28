@@ -7,8 +7,34 @@ extern "C"
 #include "php_cparser.h"
 #include "NativeIterators.h"
 
-using cparser_type = cparser_obj<CXType>;
+using cparser_type = cparser_obj<cparser_native_type>;
 using cparser_targ_it = cparser_obj<NativeTemplateArgumentIterator>;
+
+static inline void cparser_init_template_argument_iterator(NativeTemplateArgumentIterator *native, const cparser_native_type *type_native)
+{
+    native->source_type = type_native->type;
+    native->source_cursor = clang_getNullCursor();
+    native->use_cursor = 0;
+
+    int count = -1;
+    CXCursor template_arg_cursor = clang_getNullCursor();
+    if (cparser_resolve_template_argument_cursor(type_native, &template_arg_cursor, &count))
+    {
+        native->use_cursor = 1;
+        native->source_cursor = template_arg_cursor;
+    }
+    else
+    {
+        count = clang_Type_getNumTemplateArguments(type_native->type);
+    }
+
+    native->count = count;
+    if (native->count < 0)
+    {
+        native->count = 0;
+    }
+    native->index = 0;
+}
 
 template <>
 void cparser_object_free<NativeTemplateArgumentIterator>(zend_object *obj)
@@ -29,16 +55,10 @@ ZEND_METHOD(CParser_TemplateArgumentIterator, __construct)
     Z_PARAM_OBJECT_OF_CLASS(type_zv, cparser_type_ce)
     ZEND_PARSE_PARAMETERS_END();
 
-    cparser_type *type = php_cparser_fetch<CXType>(Z_OBJ_P(type_zv));
+    cparser_type *type = php_cparser_fetch<cparser_native_type>(Z_OBJ_P(type_zv));
     cparser_targ_it *it = php_cparser_fetch<NativeTemplateArgumentIterator>(Z_OBJ_P(getThis()));
 
-    it->native.source = type->native;
-    it->native.count = clang_Type_getNumTemplateArguments(type->native);
-    if (it->native.count < 0)
-    {
-        it->native.count = 0;
-    }
-    it->native.index = 0;
+    cparser_init_template_argument_iterator(&it->native, &type->native);
     ZVAL_COPY(&it->native.owner, type_zv);
 }
 
@@ -51,9 +71,12 @@ ZEND_METHOD(CParser_TemplateArgumentIterator, current)
         RETURN_NULL();
     }
 
-    CXType argType = clang_Type_getTemplateArgumentAsType(it->native.source, it->native.index);
     object_init_ex(return_value, cparser_templateargument_ce);
-    php_cparser_fetch<CXType>(Z_OBJ_P(return_value))->native = argType;
+    auto *arg = php_cparser_fetch<cparser_native_template_argument>(Z_OBJ_P(return_value));
+    arg->native.source_type = it->native.source_type;
+    arg->native.source_cursor = it->native.source_cursor;
+    arg->native.index = (unsigned)it->native.index;
+    arg->native.use_cursor = it->native.use_cursor;
 }
 
 ZEND_METHOD(CParser_TemplateArgumentIterator, key)
