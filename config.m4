@@ -7,12 +7,13 @@ PHP_ARG_ENABLE([cparser],
 AS_VAR_IF([PHP_CPARSER], [no],, [
   PHP_REQUIRE_CXX()
   
-  AC_PATH_PROG(LLVM_CONFIG, llvm-config, no)
+  AC_PATH_PROGS([LLVM_CONFIG], [llvm-config llvm-config-19 llvm-config-18], [no])
 
   if test -x "$LLVM_CONFIG"; then
     AC_MSG_CHECKING([for libclang via llvm-config])
     LIBCLANG_CFLAGS=`$LLVM_CONFIG --includedir --cflags`
-    LIBCLANG_LIBS="`$LLVM_CONFIG --libs --system-libs` -lclang"
+    LIBCLANG_LIBDIR=`$LLVM_CONFIG --libdir`
+    LIBCLANG_LIBS="-L$LIBCLANG_LIBDIR `$LLVM_CONFIG --libs --system-libs` -lclang"
   else
     AC_MSG_CHECKING([for libclang via pkg-config])
     AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
@@ -29,8 +30,7 @@ AS_VAR_IF([PHP_CPARSER], [no],, [
 
   PHP_EVAL_INCLINE($LIBCLANG_CFLAGS)
   PHP_EVAL_LIBLINE($LIBCLANG_LIBS, CPARSER_SHARED_LIBADD)
-
-  LDFLAGS="$LDFLAGS $LIBCLANG_LIBS"
+  PHP_SUBST([CPARSER_SHARED_LIBADD])
 
   cparser_source_files="cparser.cpp \
     src/TranslationUnit.cpp \
@@ -47,5 +47,6 @@ AS_VAR_IF([PHP_CPARSER], [no],, [
   PHP_NEW_EXTENSION([cparser],
     $cparser_source_files,
     [$ext_shared],,
-    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
+    [yes])
 ])
