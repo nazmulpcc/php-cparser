@@ -137,6 +137,15 @@ class Cursor {
      * @return iterable<Cursor>
     */
     public function getChildren(int $kind = -1): iterable {}
+
+    /**
+     * Return direct annotate-attribute spellings attached to this cursor.
+     *
+     * For example, `__attribute__((annotate("foo")))` yields `["foo"]`.
+     *
+     * @return list<string>
+     */
+    public function getAnnotations(): array {}
 }
 
 final class ClassCursor extends Cursor {

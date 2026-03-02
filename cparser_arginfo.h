@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6784a3ba217cc0a4e3eaee300bbc8a18b9c2d6ad */
+ * Stub hash: a94d117f811559ed5ab1f59e737285489ad0aa05 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CParser_CursorIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_TYPE_MASK(0, source, CParser\\TranslationUnit|CParser\\Cursor, 0, NULL)
@@ -87,6 +87,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_CParser_Cursor_getParent arginfo_class_CParser_CursorIterator_current
 
 #define arginfo_class_CParser_Cursor_getChildren arginfo_class_CParser_TranslationUnit_cursors
+
+#define arginfo_class_CParser_Cursor_getAnnotations arginfo_class_CParser_Cursor_getLocation
 
 #define arginfo_class_CParser_ClassCursor_getBases arginfo_class_CParser_TranslationUnit_classes
 
@@ -220,6 +222,7 @@ ZEND_METHOD(CParser_Cursor, isDefinition);
 ZEND_METHOD(CParser_Cursor, getCanonical);
 ZEND_METHOD(CParser_Cursor, getParent);
 ZEND_METHOD(CParser_Cursor, getChildren);
+ZEND_METHOD(CParser_Cursor, getAnnotations);
 ZEND_METHOD(CParser_ClassCursor, getBases);
 ZEND_METHOD(CParser_ClassCursor, getMethods);
 ZEND_METHOD(CParser_ClassCursor, getFields);
@@ -318,6 +321,7 @@ static const zend_function_entry class_CParser_Cursor_methods[] = {
 	ZEND_ME(CParser_Cursor, getCanonical, arginfo_class_CParser_Cursor_getCanonical, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_Cursor, getParent, arginfo_class_CParser_Cursor_getParent, ZEND_ACC_PUBLIC)
 	ZEND_ME(CParser_Cursor, getChildren, arginfo_class_CParser_Cursor_getChildren, ZEND_ACC_PUBLIC)
+	ZEND_ME(CParser_Cursor, getAnnotations, arginfo_class_CParser_Cursor_getAnnotations, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

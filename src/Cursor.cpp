@@ -284,6 +284,44 @@ ZEND_METHOD(CParser_Cursor, getChildren)
     RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(filter_kind);
 }
 
+struct AnnotationCollectData
+{
+    zval *retval;
+};
+
+ZEND_METHOD(CParser_Cursor, getAnnotations)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+        RETURN_NULL();
+
+    array_init(return_value);
+
+    AnnotationCollectData data = {return_value};
+    clang_visitChildren(
+        intern->native,
+        [](CXCursor c, CXCursor /*parent*/, CXClientData client_data)
+        {
+            if (clang_getCursorKind(c) != CXCursor_AnnotateAttr)
+            {
+                return CXChildVisit_Continue;
+            }
+
+            CXString spelling = clang_getCursorSpelling(c);
+            const char *text = clang_getCString(spelling);
+            if (text && text[0] != '\0')
+            {
+                add_next_index_string(static_cast<AnnotationCollectData *>(client_data)->retval, text);
+            }
+            clang_disposeString(spelling);
+
+            return CXChildVisit_Continue;
+        },
+        &data);
+}
+
 ZEND_METHOD(CParser_ClassCursor, getBases)
 {
     ZEND_PARSE_PARAMETERS_NONE();
