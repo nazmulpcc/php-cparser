@@ -77,6 +77,9 @@ void cparser_create_cursor(CXCursor *cursor, zval *return_value)
         ce = cparser_classcursor_ce;
         break;
     case CXCursor_CXXMethod:
+    case CXCursor_Constructor:
+    case CXCursor_Destructor:
+    case CXCursor_ConversionFunction:
         ce = cparser_methodcursor_ce;
         break;
     case CXCursor_FunctionDecl:
