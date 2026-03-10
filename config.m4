@@ -32,6 +32,17 @@ AS_VAR_IF([PHP_CPARSER], [no],, [
   PHP_EVAL_LIBLINE($LIBCLANG_LIBS, CPARSER_SHARED_LIBADD)
   PHP_SUBST([CPARSER_SHARED_LIBADD])
 
+  AC_CHECK_DECLS([
+    clang_CXXMethod_isDeleted,
+    clang_CXXMethod_isDefaulted,
+    clang_CXXMethod_isExplicit,
+    clang_CXXConstructor_isCopyConstructor,
+    clang_CXXConstructor_isMoveConstructor,
+    clang_CXXConstructor_isDefaultConstructor,
+    clang_isVirtualBase,
+    clang_getInclusions
+  ], [], [], [[#include <clang-c/Index.h>]])
+
   cparser_source_files="cparser.cpp \
     src/TranslationUnit.cpp \
     src/Cursor.cpp \

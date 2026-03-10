@@ -9,6 +9,76 @@ extern "C"
 
 using cparser_cursor = cparser_obj<CXCursor>;
 
+#if defined(HAVE_DECL_CLANG_CXXMETHOD_ISDELETED) && HAVE_DECL_CLANG_CXXMETHOD_ISDELETED
+#define HAVE_CLANG_CXXMETHOD_ISDELETED 1
+#endif
+
+#if defined(HAVE_DECL_CLANG_CXXMETHOD_ISDEFAULTED) && HAVE_DECL_CLANG_CXXMETHOD_ISDEFAULTED
+#define HAVE_CLANG_CXXMETHOD_ISDEFAULTED 1
+#endif
+
+#if defined(HAVE_DECL_CLANG_CXXCONSTRUCTOR_ISCOPYCONSTRUCTOR) && HAVE_DECL_CLANG_CXXCONSTRUCTOR_ISCOPYCONSTRUCTOR
+#define HAVE_CLANG_CXXCONSTRUCTOR_ISCOPYCONSTRUCTOR 1
+#endif
+
+#if defined(HAVE_DECL_CLANG_CXXCONSTRUCTOR_ISMOVECONSTRUCTOR) && HAVE_DECL_CLANG_CXXCONSTRUCTOR_ISMOVECONSTRUCTOR
+#define HAVE_CLANG_CXXCONSTRUCTOR_ISMOVECONSTRUCTOR 1
+#endif
+
+#if defined(HAVE_DECL_CLANG_CXXCONSTRUCTOR_ISDEFAULTCONSTRUCTOR) && HAVE_DECL_CLANG_CXXCONSTRUCTOR_ISDEFAULTCONSTRUCTOR
+#define HAVE_CLANG_CXXCONSTRUCTOR_ISDEFAULTCONSTRUCTOR 1
+#endif
+
+#if defined(HAVE_DECL_CLANG_CXXMETHOD_ISEXPLICIT) && HAVE_DECL_CLANG_CXXMETHOD_ISEXPLICIT
+#define HAVE_CLANG_CXXMETHOD_ISEXPLICIT 1
+#endif
+
+#if defined(HAVE_DECL_CLANG_ISVIRTUALBASE) && HAVE_DECL_CLANG_ISVIRTUALBASE
+#define HAVE_CLANG_ISVIRTUALBASE 1
+#endif
+
+#ifndef HAVE_CLANG_CXXMETHOD_ISDELETED
+#if defined(CINDEX_VERSION_MINOR) && CINDEX_VERSION_MINOR >= 32
+#define HAVE_CLANG_CXXMETHOD_ISDELETED 1
+#endif
+#endif
+
+#ifndef HAVE_CLANG_CXXMETHOD_ISDEFAULTED
+#if defined(CINDEX_VERSION_MINOR) && CINDEX_VERSION_MINOR >= 32
+#define HAVE_CLANG_CXXMETHOD_ISDEFAULTED 1
+#endif
+#endif
+
+#ifndef HAVE_CLANG_CXXCONSTRUCTOR_ISCOPYCONSTRUCTOR
+#if defined(CINDEX_VERSION_MINOR) && CINDEX_VERSION_MINOR >= 32
+#define HAVE_CLANG_CXXCONSTRUCTOR_ISCOPYCONSTRUCTOR 1
+#endif
+#endif
+
+#ifndef HAVE_CLANG_CXXCONSTRUCTOR_ISMOVECONSTRUCTOR
+#if defined(CINDEX_VERSION_MINOR) && CINDEX_VERSION_MINOR >= 32
+#define HAVE_CLANG_CXXCONSTRUCTOR_ISMOVECONSTRUCTOR 1
+#endif
+#endif
+
+#ifndef HAVE_CLANG_CXXCONSTRUCTOR_ISDEFAULTCONSTRUCTOR
+#if defined(CINDEX_VERSION_MINOR) && CINDEX_VERSION_MINOR >= 32
+#define HAVE_CLANG_CXXCONSTRUCTOR_ISDEFAULTCONSTRUCTOR 1
+#endif
+#endif
+
+#ifndef HAVE_CLANG_CXXMETHOD_ISEXPLICIT
+#if defined(CINDEX_VERSION_MINOR) && CINDEX_VERSION_MINOR >= 64
+#define HAVE_CLANG_CXXMETHOD_ISEXPLICIT 1
+#endif
+#endif
+
+#ifndef HAVE_CLANG_ISVIRTUALBASE
+#if defined(CINDEX_VERSION_MINOR) && CINDEX_VERSION_MINOR >= 32
+#define HAVE_CLANG_ISVIRTUALBASE 1
+#endif
+#endif
+
 static inline void cparser_type_init_object(zval *zv, CXType type, const CXCursor *origin_cursor = nullptr)
 {
     object_init_ex(zv, cparser_type_ce);
@@ -31,7 +101,7 @@ struct BaseClassCollectData
     zval *retval;
 };
 
-static CXCursor cparser_resolve_base_class_cursor(CXCursor base_specifier)
+static CXCursor cparser_resolve_base_class_cursor(CXCursor base_specifier, bool class_only = true)
 {
     CXType base_type = clang_getCursorType(base_specifier);
     if (base_type.kind == CXType_Invalid)
@@ -55,8 +125,13 @@ static CXCursor cparser_resolve_base_class_cursor(CXCursor base_specifier)
         return base_decl;
     }
 
+    if (!class_only)
+    {
+        return base_decl;
+    }
+
     CXCursorKind kind = clang_getCursorKind(base_decl);
-    if (kind != CXCursor_ClassDecl && kind != CXCursor_StructDecl)
+    if (kind != CXCursor_ClassDecl && kind != CXCursor_StructDecl && kind != CXCursor_ClassTemplate)
     {
         return clang_getNullCursor();
     }
@@ -103,6 +178,9 @@ void cparser_create_cursor(CXCursor *cursor, zval *return_value)
     case CXCursor_TypeAliasDecl:
     case CXCursor_TypedefDecl:
         ce = cparser_typealiascursor_ce;
+        break;
+    case CXCursor_CXXBaseSpecifier:
+        ce = cparser_basespecifier_ce;
         break;
     default:
         ce = cparser_cursor_ce;
@@ -345,7 +423,7 @@ ZEND_METHOD(CParser_ClassCursor, getBases)
                 return CXChildVisit_Continue;
             }
 
-            CXCursor base_decl = cparser_resolve_base_class_cursor(c);
+            CXCursor base_decl = cparser_resolve_base_class_cursor(c, true);
             if (clang_Cursor_isNull(base_decl))
             {
                 return CXChildVisit_Continue;
@@ -358,6 +436,13 @@ ZEND_METHOD(CParser_ClassCursor, getBases)
             return CXChildVisit_Continue;
         },
         &data);
+}
+
+ZEND_METHOD(CParser_ClassCursor, getBaseSpecifiers)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+
+    RETURN_DIRECT_CHILD_CURSOR_WITH_FILTER(CXCursor_CXXBaseSpecifier);
 }
 
 ZEND_METHOD(CParser_ClassCursor, getMethods)
@@ -503,6 +588,121 @@ ZEND_METHOD(CParser_MethodCursor, getAccessSpecifier)
     if (!intern)
         RETURN_NULL();
     RETURN_LONG((zend_long)clang_getCXXAccessSpecifier(intern->native));
+}
+
+ZEND_METHOD(CParser_MethodCursor, isDeleted)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+    {
+        RETURN_FALSE;
+    }
+#ifdef HAVE_CLANG_CXXMETHOD_ISDELETED
+    RETURN_BOOL(clang_CXXMethod_isDeleted(intern->native));
+#else
+    RETURN_FALSE;
+#endif
+}
+
+ZEND_METHOD(CParser_MethodCursor, isDefaulted)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+    {
+        RETURN_FALSE;
+    }
+#ifdef HAVE_CLANG_CXXMETHOD_ISDEFAULTED
+    RETURN_BOOL(clang_CXXMethod_isDefaulted(intern->native));
+#else
+    RETURN_FALSE;
+#endif
+}
+
+ZEND_METHOD(CParser_MethodCursor, isExplicit)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+    {
+        RETURN_FALSE;
+    }
+#ifdef HAVE_CLANG_CXXMETHOD_ISEXPLICIT
+    RETURN_BOOL(clang_CXXMethod_isExplicit(intern->native));
+#else
+    RETURN_FALSE;
+#endif
+}
+
+ZEND_METHOD(CParser_MethodCursor, isCopyConstructor)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern || clang_getCursorKind(intern->native) != CXCursor_Constructor)
+    {
+        RETURN_FALSE;
+    }
+#ifdef HAVE_CLANG_CXXCONSTRUCTOR_ISCOPYCONSTRUCTOR
+    RETURN_BOOL(clang_CXXConstructor_isCopyConstructor(intern->native));
+#else
+    RETURN_FALSE;
+#endif
+}
+
+ZEND_METHOD(CParser_MethodCursor, isMoveConstructor)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern || clang_getCursorKind(intern->native) != CXCursor_Constructor)
+    {
+        RETURN_FALSE;
+    }
+#ifdef HAVE_CLANG_CXXCONSTRUCTOR_ISMOVECONSTRUCTOR
+    RETURN_BOOL(clang_CXXConstructor_isMoveConstructor(intern->native));
+#else
+    RETURN_FALSE;
+#endif
+}
+
+ZEND_METHOD(CParser_MethodCursor, isDefaultConstructor)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern || clang_getCursorKind(intern->native) != CXCursor_Constructor)
+    {
+        RETURN_FALSE;
+    }
+#ifdef HAVE_CLANG_CXXCONSTRUCTOR_ISDEFAULTCONSTRUCTOR
+    RETURN_BOOL(clang_CXXConstructor_isDefaultConstructor(intern->native));
+#else
+    RETURN_FALSE;
+#endif
+}
+
+ZEND_METHOD(CParser_MethodCursor, isFinal)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+    {
+        RETURN_FALSE;
+    }
+    bool is_final = false;
+    clang_visitChildren(
+        intern->native,
+        [](CXCursor c, CXCursor /*parent*/, CXClientData client_data)
+        {
+            bool *state = reinterpret_cast<bool *>(client_data);
+            if (clang_getCursorKind(c) == CXCursor_CXXFinalAttr)
+            {
+                *state = true;
+                return CXChildVisit_Break;
+            }
+            return CXChildVisit_Continue;
+        },
+        &is_final);
+    RETURN_BOOL(is_final);
 }
 
 ZEND_METHOD(CParser_FunctionCursor, getReturnType)
@@ -684,6 +884,81 @@ ZEND_METHOD(CParser_TypeAliasCursor, getUnderlyingType)
     cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
     if (!intern)
         RETURN_NULL();
+
     CXType t = clang_getTypedefDeclUnderlyingType(intern->native);
+    if (t.kind == CXType_Invalid)
+    {
+        t = clang_getCanonicalType(clang_getCursorType(intern->native));
+    }
+    if (t.kind == CXType_Invalid)
+    {
+        RETURN_NULL();
+    }
+
     cparser_type_init_object(return_value, t, &intern->native);
+}
+
+ZEND_METHOD(CParser_BaseSpecifier, getType)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+    {
+        RETURN_NULL();
+    }
+    CXType t = clang_getCursorType(intern->native);
+    if (t.kind == CXType_Invalid)
+    {
+        RETURN_NULL();
+    }
+    cparser_type_init_object(return_value, t, &intern->native);
+}
+
+ZEND_METHOD(CParser_BaseSpecifier, getAccessSpecifier)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+    {
+        RETURN_NULL();
+    }
+
+    CX_CXXAccessSpecifier access = clang_getCXXAccessSpecifier(intern->native);
+    if (access == CX_CXXInvalidAccessSpecifier)
+    {
+        RETURN_NULL();
+    }
+    RETURN_LONG((zend_long)access);
+}
+
+ZEND_METHOD(CParser_BaseSpecifier, isVirtual)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+    {
+        RETURN_FALSE;
+    }
+#ifdef HAVE_CLANG_ISVIRTUALBASE
+    RETURN_BOOL(clang_isVirtualBase(intern->native));
+#else
+    RETURN_FALSE;
+#endif
+}
+
+ZEND_METHOD(CParser_BaseSpecifier, getReferenced)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    cparser_cursor *intern = php_cparser_fetch<CXCursor>(Z_OBJ_P(getThis()));
+    if (!intern)
+    {
+        RETURN_NULL();
+    }
+
+    CXCursor referenced = cparser_resolve_base_class_cursor(intern->native, false);
+    if (clang_Cursor_isNull(referenced))
+    {
+        RETURN_NULL();
+    }
+    cparser_create_cursor(&referenced, return_value);
 }

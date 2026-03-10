@@ -3,7 +3,7 @@
 
 extern zend_module_entry cparser_module_entry;
 #define phpext_cparser_ptr &cparser_module_entry
-#define PHP_CPARSER_VERSION "0.1.0"
+#define PHP_CPARSER_VERSION "0.2.0"
 
 // ---------------------------
 // Class entries
@@ -19,6 +19,7 @@ extern zend_class_entry *cparser_enumconstantcursor_ce;
 extern zend_class_entry *cparser_parametercursor_ce;
 extern zend_class_entry *cparser_namespacecursor_ce;
 extern zend_class_entry *cparser_typealiascursor_ce;
+extern zend_class_entry *cparser_basespecifier_ce;
 extern zend_class_entry *cparser_type_ce;
 extern zend_class_entry *cparser_templatedecl_ce;
 extern zend_class_entry *cparser_templateparameter_ce;
@@ -28,6 +29,7 @@ extern zend_class_entry *cparser_diagnostic_ce;
 extern zend_class_entry *cparser_cursoriterator_ce;
 extern zend_class_entry *cparser_diagnosticiterator_ce;
 extern zend_class_entry *cparser_templateargumentiterator_ce;
+extern zend_class_entry *cparser_inclusion_ce;
 
 #ifdef __cplusplus
 
@@ -38,6 +40,8 @@ struct cparser_native_translation_unit
 {
     CXIndex index;
     CXTranslationUnit tu;
+    zval includes_cache;
+    zend_bool includes_cache_ready;
 };
 
 struct cparser_native_type
@@ -53,6 +57,16 @@ struct cparser_native_template_argument
     CXType source_type;
     unsigned index;
     zend_bool use_cursor;
+};
+
+struct cparser_native_inclusion
+{
+    zend_string *source_file;
+    zend_string *included_file;
+    zend_string *spelling;
+    zend_long line;
+    zend_long column;
+    zend_bool angled;
 };
 
 static inline bool cparser_try_template_argument_cursor(CXCursor cursor, int *count_out)
@@ -106,6 +120,8 @@ static inline bool cparser_resolve_template_argument_cursor(const cparser_native
 }
 
 class NativeCXCursorIterator;
+struct NativeDiagnosticIterator;
+struct NativeTemplateArgumentIterator;
 
 void cparser_create_cursor(CXCursor *cursor, zval *return_value);
 
@@ -147,6 +163,16 @@ void cparser_object_free(zend_object *object)
 
 template <>
 void cparser_object_free<NativeCXCursorIterator>(zend_object *object);
+template <>
+void cparser_object_free<NativeDiagnosticIterator>(zend_object *object);
+template <>
+void cparser_object_free<NativeTemplateArgumentIterator>(zend_object *object);
+template <>
+void cparser_object_free<cparser_native_translation_unit>(zend_object *object);
+template <>
+void cparser_object_free<cparser_native_inclusion>(zend_object *object);
+template <>
+void cparser_object_free<CXDiagnostic>(zend_object *object);
 
 static inline int cparser_compare_cursors(zval *object1, zval *object2)
 {

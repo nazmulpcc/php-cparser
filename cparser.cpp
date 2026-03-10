@@ -31,12 +31,14 @@ zend_class_entry *cparser_enumconstantcursor_ce = nullptr;
 zend_class_entry *cparser_parametercursor_ce = nullptr;
 zend_class_entry *cparser_namespacecursor_ce = nullptr;
 zend_class_entry *cparser_typealiascursor_ce = nullptr;
+zend_class_entry *cparser_basespecifier_ce = nullptr;
 
 zend_class_entry *cparser_type_ce = nullptr;
 zend_class_entry *cparser_templatedecl_ce = nullptr;
 zend_class_entry *cparser_templateparameter_ce = nullptr;
 zend_class_entry *cparser_templateargument_ce = nullptr;
 zend_class_entry *cparser_diagnostic_ce = nullptr;
+zend_class_entry *cparser_inclusion_ce = nullptr;
 zend_class_entry *cparser_cursoriterator_ce = nullptr;
 zend_class_entry *cparser_diagnosticiterator_ce = nullptr;
 zend_class_entry *cparser_templateargumentiterator_ce = nullptr;
@@ -75,6 +77,12 @@ void register_cursorkind_constants(zend_class_entry *ce, int start, int end)
 {
 	for (int i = start; i <= end; i++)
 	{
+		/* libclang statement kinds are sparse in newer releases (e.g. 312..319). */
+		if (i >= 312 && i <= 319)
+		{
+			continue;
+		}
+
 		CXString spelling = clang_getCursorKindSpelling((enum CXCursorKind)i);
 		const char *name = clang_getCString(spelling);
 		if (name && name[0] != '\0')
@@ -116,6 +124,8 @@ PHP_MINIT_FUNCTION(cparser)
 	register_cparser_ce_handlers<CXCursor>(cparser_namespacecursor_ce);
 	cparser_typealiascursor_ce = register_class_CParser_TypeAliasCursor(cparser_cursor_ce);
 	register_cparser_ce_handlers<CXCursor>(cparser_typealiascursor_ce);
+	cparser_basespecifier_ce = register_class_CParser_BaseSpecifier(cparser_cursor_ce);
+	register_cparser_ce_handlers<CXCursor>(cparser_basespecifier_ce);
 
 	cparser_type_ce = register_class_CParser_Type();
 	register_cparser_ce_handlers<cparser_native_type>(cparser_type_ce);
@@ -131,6 +141,8 @@ PHP_MINIT_FUNCTION(cparser)
 
 	cparser_diagnostic_ce = register_class_CParser_Diagnostic();
 	register_cparser_ce_handlers<CXDiagnostic>(cparser_diagnostic_ce);
+	cparser_inclusion_ce = register_class_CParser_Inclusion();
+	register_cparser_ce_handlers<cparser_native_inclusion>(cparser_inclusion_ce);
 
 	// CursorIterator
 	cparser_cursoriterator_ce = register_class_CParser_CursorIterator(zend_ce_iterator);

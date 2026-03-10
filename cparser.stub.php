@@ -104,6 +104,20 @@ final class TranslationUnit
      * @return iterable<Diagnostic>
      */
     public function diagnostics(): iterable {}
+
+    /**
+     * Lazily yield include graph entries discovered by libclang preprocessing.
+     *
+     * @return iterable<Inclusion>
+     */
+    public function includes(): iterable {}
+
+    /**
+     * Lazily yield alias declarations (both using and typedef).
+     *
+     * @return iterable<TypeAliasCursor>
+     */
+    public function aliases(): iterable {}
 }
 
 class Cursor {
@@ -151,6 +165,8 @@ class Cursor {
 final class ClassCursor extends Cursor {
     /** @return iterable<ClassCursor> */
     public function getBases(): iterable {}
+    /** @return iterable<BaseSpecifier> */
+    public function getBaseSpecifiers(): iterable {}
     /** @return iterable<MethodCursor> */
     public function getMethods(): iterable {}
     /** @return iterable<FieldCursor> */
@@ -175,6 +191,13 @@ final class MethodCursor extends Cursor {
     public function isVirtual(): bool {}
     public function isPureVirtual(): bool {}
     public function getAccessSpecifier(): ?int {}
+    public function isDeleted(): bool {}
+    public function isDefaulted(): bool {}
+    public function isExplicit(): bool {}
+    public function isCopyConstructor(): bool {}
+    public function isMoveConstructor(): bool {}
+    public function isDefaultConstructor(): bool {}
+    public function isFinal(): bool {}
 }
 
 final class FunctionCursor extends Cursor {
@@ -212,6 +235,14 @@ final class NamespaceCursor extends Cursor {
 
 final class TypeAliasCursor extends Cursor {
     public function getUnderlyingType(): Type {}
+}
+
+final class BaseSpecifier extends Cursor
+{
+    public function getType(): ?Type {}
+    public function getAccessSpecifier(): ?int {}
+    public function isVirtual(): bool {}
+    public function getReferenced(): ?Cursor {}
 }
 
 /**
@@ -266,6 +297,16 @@ final class Diagnostic
 {
     public function getMessage(): string {}
     public function getSeverity(): int {}
+    public function getLine(): int {}
+    public function getColumn(): int {}
+}
+
+final class Inclusion
+{
+    public function getSourceFile(): ?string {}
+    public function getIncludedFile(): ?string {}
+    public function getSpelling(): string {}
+    public function isAngled(): bool {}
     public function getLine(): int {}
     public function getColumn(): int {}
 }

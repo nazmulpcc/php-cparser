@@ -2,6 +2,18 @@ ARG_ENABLE('cparser', 'cparser support', 'no');
 
 if (PHP_CPARSER != 'no') {
 	AC_DEFINE('HAVE_CPARSER', 1, "Define to 1 if the PHP extension 'cparser' is available.");
-
-	EXTENSION('cparser', 'cparser.c', null, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	EXTENSION('cparser',
+		'cparser.cpp ' +
+		'src\\TranslationUnit.cpp ' +
+		'src\\Cursor.cpp ' +
+		'src\\Type.cpp ' +
+		'src\\TemplateDecl.cpp ' +
+		'src\\TemplateParameter.cpp ' +
+		'src\\TemplateArgument.cpp ' +
+		'src\\Diagnostic.cpp ' +
+		'src\\CursorIterator.cpp ' +
+		'src\\DiagnosticIterator.cpp ' +
+		'src\\TemplateArgumentIterator.cpp',
+		true,
+		'/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 }
