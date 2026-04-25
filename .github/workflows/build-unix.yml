@@ -1,0 +1,103 @@
+name: Build Unix Extensions
+
+"on":
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.os }} / PHP ${{ matrix.php }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-24.04
+          - macos-15
+        php:
+          - '8.4'
+          - '8.5'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Install libclang on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang libclang-dev llvm-dev
+
+      - name: Install libclang on macOS
+        if: runner.os == 'macOS'
+        run: |
+          brew install llvm
+          LLVM_PREFIX="$(brew --prefix llvm)"
+          echo "$LLVM_PREFIX/bin" >> "$GITHUB_PATH"
+          echo "DYLD_LIBRARY_PATH=$LLVM_PREFIX/lib:${DYLD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+
+      - name: Show toolchain
+        run: |
+          php -v
+          phpize --version
+          php-config --version
+          llvm-config --version
+          llvm-config --includedir
+          llvm-config --libdir
+
+      - name: Build extension
+        run: |
+          phpize
+          ./configure --enable-cparser
+          make -j"$(getconf _NPROCESSORS_ONLN)"
+
+      - name: Verify extension loads
+        run: |
+          php -d "extension=$PWD/modules/cparser.so" --ri cparser
+
+      - name: Run PHPT tests
+        env:
+          NO_INTERACTION: '1'
+          REPORT_EXIT_STATUS: '1'
+          TEST_PHP_ARGS: "-q -d extension=${{ github.workspace }}/modules/cparser.so"
+        run: |
+          make test TESTS=tests
+
+      - name: Prepare artifact
+        if: always()
+        run: |
+          mkdir -p dist
+          if [ -f modules/cparser.so ]; then
+            cp modules/cparser.so "dist/cparser-${{ runner.os }}-php-${{ matrix.php }}.so"
+          fi
+          {
+            echo "os=${{ matrix.os }}"
+            echo "runner_os=${{ runner.os }}"
+            echo "php=${{ matrix.php }}"
+            echo "php_version=$(php-config --version)"
+            echo "extension_dir=$(php-config --extension-dir)"
+            if command -v llvm-config >/dev/null 2>&1; then
+              echo "llvm_version=$(llvm-config --version)"
+              echo "llvm_libdir=$(llvm-config --libdir)"
+            else
+              echo "llvm_version=unavailable"
+              echo "llvm_libdir=unavailable"
+            fi
+          } > dist/build-info.txt
+
+      - name: Upload extension artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cparser-${{ runner.os }}-php-${{ matrix.php }}
+          path: dist/
+          if-no-files-found: error
