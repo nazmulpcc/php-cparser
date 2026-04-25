@@ -9,14 +9,18 @@ name: Build Unix Extensions
 
 jobs:
   build:
-    name: ${{ matrix.os }} / PHP ${{ matrix.php }}
-    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.target.platform }}-${{ matrix.target.arch }} / PHP ${{ matrix.php }}
+    runs-on: ${{ matrix.target.os }}
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-24.04
-          - macos-15
+        target:
+          - os: ubuntu-24.04
+            platform: linux
+            arch: x86_64
+          - os: macos-15
+            platform: macos
+            arch: arm64
         php:
           - '8.4'
           - '8.5'
@@ -68,7 +72,6 @@ jobs:
         env:
           NO_INTERACTION: '1'
           REPORT_EXIT_STATUS: '1'
-          TEST_PHP_ARGS: "-q -d extension=${{ github.workspace }}/modules/cparser.so"
         run: |
           make test TESTS=tests
 
@@ -77,10 +80,13 @@ jobs:
         run: |
           mkdir -p dist
           if [ -f modules/cparser.so ]; then
-            cp modules/cparser.so "dist/cparser-${{ runner.os }}-php-${{ matrix.php }}.so"
+            cp modules/cparser.so "dist/cparser-${{ matrix.target.platform }}-${{ matrix.target.arch }}-php-${{ matrix.php }}.so"
           fi
           {
-            echo "os=${{ matrix.os }}"
+            echo "os=${{ matrix.target.os }}"
+            echo "platform=${{ matrix.target.platform }}"
+            echo "arch=${{ matrix.target.arch }}"
+            echo "runtime_arch=$(uname -m)"
             echo "runner_os=${{ runner.os }}"
             echo "php=${{ matrix.php }}"
             echo "php_version=$(php-config --version)"
@@ -98,6 +104,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cparser-${{ runner.os }}-php-${{ matrix.php }}
+          name: cparser-${{ matrix.target.platform }}-${{ matrix.target.arch }}-php-${{ matrix.php }}
           path: dist/
           if-no-files-found: error
